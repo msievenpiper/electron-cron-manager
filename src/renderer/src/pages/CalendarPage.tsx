@@ -1,3 +1,41 @@
+import { useState, useEffect } from 'react'
+import { Job } from '../../../shared/types'
+import CalendarMonthView from '../components/CalendarMonthView'
+import CalendarTimelineView from '../components/CalendarTimelineView'
+
+type CalendarView = 'month' | 'timeline'
+
 export default function CalendarPage() {
-  return <div className="p-4 text-gray-100">Calendar</div>
+  const [view, setView] = useState<CalendarView>('month')
+  const [jobs, setJobs] = useState<Job[]>([])
+
+  useEffect(() => {
+    window.cronManager.jobs.list().then(setJobs)
+  }, [])
+
+  return (
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Calendar</h2>
+        <div className="flex gap-1 bg-gray-800 rounded p-1">
+          {(['month', 'timeline'] as CalendarView[]).map(v => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-3 py-1 text-xs rounded capitalize transition-colors ${
+                view === v ? 'bg-gray-600 text-white' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view === 'month'
+        ? <CalendarMonthView jobs={jobs} />
+        : <CalendarTimelineView jobs={jobs} />
+      }
+    </div>
+  )
 }
