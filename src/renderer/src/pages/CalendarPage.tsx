@@ -41,7 +41,11 @@ export default function CalendarPage() {
       <div className="flex-1 min-h-0 overflow-auto">
         {view === 'month'
           ? <CalendarMonthView jobs={jobs} onDaySelect={handleDaySelect} />
-          : <CalendarTimelineView jobs={jobs} initialDate={selectedDate ?? undefined} />
+          : <CalendarTimelineView
+              key={selectedDate?.toISOString() ?? 'default'}
+              jobs={jobs}
+              initialDate={selectedDate ?? undefined}
+            />
         }
       </div>
     </div>
