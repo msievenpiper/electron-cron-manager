@@ -50,7 +50,7 @@ export default function CalendarTimelineView({ jobs }: Props) {
         <p className="text-gray-500 text-sm ml-14">No jobs scheduled for this day.</p>
       )}
 
-      <div className="overflow-auto max-h-[500px]">
+      <div>
         {HOURS.map(hour => {
           const hourRuns = dayRuns.flatMap(({ job, jobIdx, times }) =>
             times.filter(t => t.getHours() === hour).map(t => ({ job, jobIdx, t }))

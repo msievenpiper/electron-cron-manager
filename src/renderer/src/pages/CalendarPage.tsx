@@ -14,8 +14,8 @@ export default function CalendarPage() {
   }, [])
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-4 flex-1 min-h-0 flex flex-col">
+      <div className="flex justify-between items-center mb-4 shrink-0">
         <h2 className="text-lg font-semibold">Calendar</h2>
         <div className="flex gap-1 bg-gray-800 rounded p-1">
           {(['month', 'timeline'] as CalendarView[]).map(v => (
@@ -32,10 +32,12 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {view === 'month'
-        ? <CalendarMonthView jobs={jobs} />
-        : <CalendarTimelineView jobs={jobs} />
-      }
+      <div className="flex-1 min-h-0 overflow-auto">
+        {view === 'month'
+          ? <CalendarMonthView jobs={jobs} />
+          : <CalendarTimelineView jobs={jobs} />
+        }
+      </div>
     </div>
   )
 }

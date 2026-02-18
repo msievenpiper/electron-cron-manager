@@ -29,7 +29,7 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 flex-1 min-h-0 overflow-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Jobs</h2>
         <button

@@ -25,7 +25,7 @@ export default function Layout() {
           </button>
         ))}
       </nav>
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-hidden flex flex-col">
         {tab === 'jobs' && <JobsPage />}
         {tab === 'calendar' && <CalendarPage />}
         {tab === 'history' && <HistoryPage />}

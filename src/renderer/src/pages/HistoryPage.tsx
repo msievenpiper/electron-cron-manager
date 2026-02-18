@@ -29,7 +29,7 @@ export default function HistoryPage() {
   }, [refresh])
 
   return (
-    <div className="p-4">
+    <div className="p-4 flex-1 min-h-0 overflow-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">History</h2>
         <button onClick={refresh} className="text-xs text-gray-400 hover:text-white">Refresh</button>
