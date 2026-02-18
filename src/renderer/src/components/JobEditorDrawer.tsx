@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Job, Interpreter, NotifySetting } from '../../../shared/types'
-import cronstrue from 'cronstrue'
+import CronBuilder from './CronBuilder'
 
 const INTERPRETERS: Interpreter[] = ['bash', 'sh', 'zsh', 'node', 'python3', 'ruby']
 
@@ -18,9 +18,6 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
   const [notify, setNotify] = useState<NotifySetting>(job?.notify ?? 'failure')
   const [enabled, setEnabled] = useState(job?.enabled ?? true)
   const [saving, setSaving] = useState(false)
-
-  let cronDescription = ''
-  try { cronDescription = cronstrue.toString(cronExpr) } catch { cronDescription = 'Invalid cron expression' }
 
   const handleRunNow = async () => {
     if (job) await window.cronManager.jobs.runNow(job.id)
@@ -63,15 +60,7 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-gray-300">Cron Expression</span>
-          <input
-            value={cronExpr}
-            onChange={e => setCronExpr(e.target.value)}
-            className="bg-gray-800 rounded px-3 py-2 text-sm font-mono outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <span className="text-xs text-gray-400">{cronDescription}</span>
-        </label>
+        <CronBuilder value={cronExpr} onChange={setCronExpr} />
 
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-gray-300">Interpreter</span>
