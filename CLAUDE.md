@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Notes
+
+- `tsconfig.node.json` includes `src/main/**/*`, which means **test files are typechecked during `npm run build`**. Unused imports in test files will fail the build (`noUnusedLocals` is on).
+
 ## Commands
 
 ```bash

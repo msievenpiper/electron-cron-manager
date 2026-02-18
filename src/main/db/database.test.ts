@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { createDatabase } from './database'
-import Database from 'better-sqlite3'
 
 describe('createDatabase', () => {
   let db: ReturnType<typeof createDatabase>
