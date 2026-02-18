@@ -7,13 +7,15 @@ type CalendarView = 'month' | 'timeline'
 
 export default function CalendarPage() {
   const [view, setView] = useState<CalendarView>('month')
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [jobs, setJobs] = useState<Job[]>([])
 
   useEffect(() => {
     window.cronManager.jobs.list().then(setJobs)
   }, [])
 
-  const handleDaySelect = (_date: Date) => {
+  const handleDaySelect = (date: Date) => {
+    setSelectedDate(date)
     setView('timeline')
   }
 
@@ -39,7 +41,7 @@ export default function CalendarPage() {
       <div className="flex-1 min-h-0 overflow-auto">
         {view === 'month'
           ? <CalendarMonthView jobs={jobs} onDaySelect={handleDaySelect} />
-          : <CalendarTimelineView jobs={jobs} />
+          : <CalendarTimelineView jobs={jobs} initialDate={selectedDate ?? undefined} />
         }
       </div>
     </div>
