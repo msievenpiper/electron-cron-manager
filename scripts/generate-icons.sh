@@ -5,13 +5,12 @@ cd "$(dirname "$0")/.."
 echo "Generating icons..."
 
 # ---- App icon ----
-# Render SVG at 1024x1024 using Quick Look (reliable SVG renderer on macOS)
-qlmanage -t -s 1024 -o /tmp/ resources/icon.svg 2>/dev/null
-if [ ! -s /tmp/icon.svg.png ]; then
-  echo "ERROR: qlmanage failed to render icon.svg" >&2
+# Use sips to render SVG directly — preserves transparency unlike qlmanage
+sips -s format png --resampleWidth 1024 resources/icon.svg --out resources/icon.png 2>/dev/null
+if [ ! -s resources/icon.png ]; then
+  echo "ERROR: sips failed to render icon.svg" >&2
   exit 1
 fi
-cp /tmp/icon.svg.png resources/icon.png
 cp resources/icon.png build/icon.png
 echo "  ✓ resources/icon.png"
 echo "  ✓ build/icon.png"
@@ -37,23 +36,23 @@ rm -rf "$ICONSET"
 echo "  ✓ build/icon.icns"
 
 # ---- Tray icons ----
+# Use sips directly on SVG — preserves transparency (qlmanage adds white background)
+
 # Normal tray icon (black -> macOS template rendering inverts for light/dark)
-qlmanage -t -s 44 -o /tmp/ resources/tray-icon.svg 2>/dev/null
-if [ ! -s /tmp/tray-icon.svg.png ]; then
-  echo "ERROR: qlmanage failed to render tray-icon.svg" >&2
+sips -s format png --resampleWidth 44 resources/tray-icon.svg --out "resources/tray-icon@2x.png" 2>/dev/null
+if [ ! -s "resources/tray-icon@2x.png" ]; then
+  echo "ERROR: sips failed to render tray-icon.svg" >&2
   exit 1
 fi
-cp /tmp/tray-icon.svg.png "resources/tray-icon@2x.png"
 sips -s format png --resampleWidth 22 "resources/tray-icon@2x.png" --out resources/tray-icon.png 2>/dev/null
 echo "  ✓ resources/tray-icon.png + tray-icon@2x.png"
 
 # Active tray icon (electric blue, not a template image)
-qlmanage -t -s 44 -o /tmp/ resources/tray-icon-active.svg 2>/dev/null
-if [ ! -s /tmp/tray-icon-active.svg.png ]; then
-  echo "ERROR: qlmanage failed to render tray-icon-active.svg" >&2
+sips -s format png --resampleWidth 44 resources/tray-icon-active.svg --out "resources/tray-icon-active@2x.png" 2>/dev/null
+if [ ! -s "resources/tray-icon-active@2x.png" ]; then
+  echo "ERROR: sips failed to render tray-icon-active.svg" >&2
   exit 1
 fi
-cp /tmp/tray-icon-active.svg.png "resources/tray-icon-active@2x.png"
 sips -s format png --resampleWidth 22 "resources/tray-icon-active@2x.png" --out resources/tray-icon-active.png 2>/dev/null
 echo "  ✓ resources/tray-icon-active.png + tray-icon-active@2x.png"
 
