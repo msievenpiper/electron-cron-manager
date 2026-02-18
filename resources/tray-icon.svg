@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+  <!-- Clock ring — black so macOS template rendering inverts it for light/dark menubar -->
+  <circle cx="22" cy="18" r="13" fill="none" stroke="black" stroke-width="2"/>
+
+  <!-- Tick marks at 12, 3, 6, 9 -->
+  <line x1="22" y1="5"  x2="22" y2="8"  stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="35" y1="18" x2="32" y2="18" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="22" y1="31" x2="22" y2="28" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="9"  y1="18" x2="12" y2="18" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Hour hand at 10 o'clock, length 7px: tip at (22+7x-0.866, 18+7x-0.5) = (16, 14.5) -->
+  <line x1="22" y1="18" x2="16" y2="14.5" stroke="black" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Minute hand at 10 min (2 o'clock), length 10px: tip at (22+10x0.866, 18+10x-0.5) = (31, 13) -->
+  <line x1="22" y1="18" x2="31" y2="13" stroke="black" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Center dot -->
+  <circle cx="22" cy="18" r="1.5" fill="black"/>
+
+  <!-- Terminal prompt inside clock -->
+  <text x="22" y="28" text-anchor="middle" font-family="monospace" font-size="8.5" font-weight="bold" fill="black">&gt;_</text>
+</svg>

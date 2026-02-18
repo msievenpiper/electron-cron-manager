@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="200" ry="200" fill="#1a1b2e"/>
+
+  <!-- Clock ring -->
+  <circle cx="512" cy="450" r="260" fill="none" stroke="#4F8EF7" stroke-width="22"/>
+
+  <!-- Tick marks at 12, 3, 6, 9 o'clock -->
+  <line x1="512" y1="190" x2="512" y2="225" stroke="#4F8EF7" stroke-width="18" stroke-linecap="round"/>
+  <line x1="772" y1="450" x2="737" y2="450" stroke="#4F8EF7" stroke-width="18" stroke-linecap="round"/>
+  <line x1="512" y1="710" x2="512" y2="675" stroke="#4F8EF7" stroke-width="18" stroke-linecap="round"/>
+  <line x1="252" y1="450" x2="287" y2="450" stroke="#4F8EF7" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- Hour hand at 10 o'clock (300 deg): direction (sin300, -cos300) = (-0.866, -0.5), length 150px -->
+  <line x1="512" y1="450" x2="382" y2="375" stroke="#4F8EF7" stroke-width="22" stroke-linecap="round"/>
+
+  <!-- Minute hand at 2 o'clock / 10 min (60 deg): direction (sin60, -cos60) = (0.866, -0.5), length 210px -->
+  <line x1="512" y1="450" x2="694" y2="345" stroke="#4F8EF7" stroke-width="22" stroke-linecap="round"/>
+
+  <!-- Center dot -->
+  <circle cx="512" cy="450" r="16" fill="#4F8EF7"/>
+
+  <!-- Terminal prompt inside clock face -->
+  <text x="512" y="630" text-anchor="middle" font-family="monospace" font-size="120" font-weight="bold" fill="#4F8EF7">&gt;_</text>
+</svg>
