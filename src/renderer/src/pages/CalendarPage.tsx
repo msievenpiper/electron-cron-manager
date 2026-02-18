@@ -27,7 +27,7 @@ export default function CalendarPage() {
           {(['month', 'timeline'] as CalendarView[]).map(v => (
             <button
               key={v}
-              onClick={() => setView(v)}
+              onClick={() => { setView(v); setSelectedDate(null) }}
               className={`px-3 py-1 text-xs rounded capitalize transition-colors ${
                 view === v ? 'bg-gray-600 text-white' : 'text-gray-400 hover:text-white'
               }`}
