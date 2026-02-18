@@ -9,7 +9,8 @@ import Database from 'better-sqlite3'
 export function registerIpcHandlers(
   db: Database.Database,
   scheduler: SchedulerEngine,
-  getWindow: () => BrowserWindow | null
+  getWindow: () => BrowserWindow | null,
+  onStatusChange?: () => void
 ): void {
   const jobRepo = new JobRepository(db)
   const runRepo = new RunRepository(db)
@@ -24,6 +25,7 @@ export function registerIpcHandlers(
     onJobStart: (jobId: string, _runId: string) => {
       runRepo.start(jobId)
       getWindow()?.webContents.send(IPC.JOB_STARTED, jobId)
+      onStatusChange?.()
     },
     onJobFinish: (jobId: string, _runId: string, result: ExecuteResult) => {
       const activeRun = runRepo.findByJobId(jobId, 1).find(r => r.status === 'running')
@@ -36,6 +38,7 @@ export function registerIpcHandlers(
         }
       }
       getWindow()?.webContents.send(IPC.JOB_FINISHED, jobId)
+      onStatusChange?.()
     },
   })
 

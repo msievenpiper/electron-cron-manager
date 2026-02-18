@@ -16,6 +16,20 @@ const scheduler = new SchedulerEngine({
   onJobFinish: () => {},
 })
 
+function updateTrayMenu(): void {
+  if (!tray) return
+  const running = scheduler.getRunningJobIds()
+  const runningLabel = running.length > 0 ? `${running.length} job(s) running` : 'No jobs running'
+  const menu = Menu.buildFromTemplate([
+    { label: runningLabel, enabled: false },
+    { type: 'separator' },
+    { label: 'Open Cron Manager', click: () => { mainWindow?.show(); mainWindow?.focus() } },
+    { type: 'separator' },
+    { label: 'Quit', click: () => { app.exit(0) } },
+  ])
+  tray.setContextMenu(menu)
+}
+
 function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 900,
@@ -53,7 +67,22 @@ app.whenReady().then(() => {
   })
 
   createWindow()
-  registerIpcHandlers(db, scheduler, () => mainWindow)
+
+  // Tray setup
+  const iconPath = join(__dirname, '../../resources/tray-icon.png')
+  tray = new Tray(nativeImage.createFromPath(iconPath))
+  tray.setToolTip('Cron Manager')
+  tray.on('click', () => {
+    if (mainWindow?.isVisible()) {
+      mainWindow.hide()
+    } else {
+      mainWindow?.show()
+      mainWindow?.focus()
+    }
+  })
+  updateTrayMenu()
+
+  registerIpcHandlers(db, scheduler, () => mainWindow, updateTrayMenu)
   scheduler.start(jobRepo.findAll())
   app.setLoginItemSettings({ openAtLogin: true })
 })
