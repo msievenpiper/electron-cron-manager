@@ -28,7 +28,9 @@ const WEEKDAYS = [
   { label: 'Sat', value: '6' },
 ]
 
-const FIELD_META: { key: keyof Omit<CronFields, 'dow'>; label: string; min: number; max: number }[] = [
+type FieldMeta = { key: keyof Omit<CronFields, 'dow'>; label: string; min: number; max: number }
+
+const FIELD_META: FieldMeta[] = [
   { key: 'minute', label: 'Min',   min: 0, max: 59 },
   { key: 'hour',   label: 'Hour',  min: 0, max: 23 },
   { key: 'dom',    label: 'Day',   min: 1, max: 31 },
@@ -53,9 +55,9 @@ export default function CronBuilder({ value, onChange }: Props) {
     onChange(buildCronFromFields({ ...fields, [key]: val }))
   }
 
-  const handleAnyToggle = (key: keyof CronFields, isAny: boolean) => {
+  const handleAnyToggle = (key: keyof CronFields, checked: boolean) => {
     const fallback = key === 'dom' || key === 'month' ? '1' : '0'
-    handleFieldChange(key, isAny ? '*' : fallback)
+    handleFieldChange(key, checked ? '*' : fallback)
   }
 
   return (
@@ -88,7 +90,7 @@ export default function CronBuilder({ value, onChange }: Props) {
             className="bg-gray-800 rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
           >
             {PRESETS.map(p => (
-              <option key={p.label} value={p.expr ?? '__custom__'}>{p.label}</option>
+              <option key={p.label} value={p.expr ?? '__custom__'} disabled={p.expr === null}>{p.label}</option>
             ))}
           </select>
 
@@ -105,7 +107,10 @@ export default function CronBuilder({ value, onChange }: Props) {
                     value={isAny ? '' : fields[key]}
                     disabled={isAny}
                     placeholder="*"
-                    onChange={e => handleFieldChange(key, e.target.value)}
+                    onChange={e => {
+                      const raw = e.target.value
+                      handleFieldChange(key, raw === '' ? '*' : raw)
+                    }}
                     className="bg-gray-800 rounded px-2 py-1.5 text-sm text-center outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-40 w-full"
                   />
                   <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
