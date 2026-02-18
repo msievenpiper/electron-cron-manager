@@ -13,6 +13,10 @@ export default function CalendarPage() {
     window.cronManager.jobs.list().then(setJobs)
   }, [])
 
+  const handleDaySelect = (_date: Date) => {
+    setView('timeline')
+  }
+
   return (
     <div className="p-4 flex-1 min-h-0 flex flex-col">
       <div className="flex justify-between items-center mb-4 shrink-0">
@@ -34,7 +38,7 @@ export default function CalendarPage() {
 
       <div className="flex-1 min-h-0 overflow-auto">
         {view === 'month'
-          ? <CalendarMonthView jobs={jobs} />
+          ? <CalendarMonthView jobs={jobs} onDaySelect={handleDaySelect} />
           : <CalendarTimelineView jobs={jobs} />
         }
       </div>

@@ -10,13 +10,12 @@ const JOB_COLORS = [
   'bg-pink-500',
 ]
 
-interface Props { jobs: Job[] }
+interface Props { jobs: Job[]; onDaySelect: (date: Date) => void }
 
-export default function CalendarMonthView({ jobs }: Props) {
+export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
-  const [selectedDay, setSelectedDay] = useState<number | null>(null)
 
   const prevMonth = () => {
     if (month === 0) { setMonth(11); setYear(y => y - 1) }
@@ -74,11 +73,10 @@ export default function CalendarMonthView({ jobs }: Props) {
           return (
             <button
               key={day}
-              onClick={() => setSelectedDay(selectedDay === day ? null : day)}
+              onClick={() => onDaySelect(new Date(year, month, day))}
               className={[
-                'aspect-square rounded flex flex-col items-center justify-start p-1 text-xs transition-colors',
+                'aspect-square rounded flex flex-col items-center justify-start p-1 text-xs transition-colors cursor-pointer',
                 isToday(day) ? 'bg-blue-900/40 text-blue-300' : 'hover:bg-gray-800 text-gray-200',
-                selectedDay === day ? 'ring-1 ring-blue-400' : '',
               ].join(' ')}
             >
               <span className="leading-none">{day}</span>
@@ -93,30 +91,6 @@ export default function CalendarMonthView({ jobs }: Props) {
           )
         })}
       </div>
-
-      {/* Selected day detail */}
-      {selectedDay !== null && (
-        <div className="mt-4 border border-gray-800 rounded p-3">
-          <h4 className="text-sm font-medium mb-2 text-gray-200">
-            {new Date(year, month, selectedDay).toLocaleDateString('default', {
-              weekday: 'long', month: 'long', day: 'numeric'
-            })}
-          </h4>
-          {(dayJobMap.get(selectedDay)?.size ?? 0) === 0 ? (
-            <p className="text-xs text-gray-500">No jobs scheduled</p>
-          ) : (
-            <ul className="space-y-1">
-              {Array.from(dayJobMap.get(selectedDay) ?? []).map(ji => (
-                <li key={ji} className="flex items-center gap-2 text-sm">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${JOB_COLORS[ji % JOB_COLORS.length]}`} />
-                  <span className="text-gray-300">{jobs[ji].name}</span>
-                  <span className="text-xs text-gray-500 font-mono ml-auto">{jobs[ji].cron}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   )
 }
