@@ -37,4 +37,9 @@ describe('buildCronFromFields', () => {
     expect(buildCronFromFields({ minute: '*', hour: '*', dom: '*', month: '*', dow: '*' }))
       .toBe('* * * * *')
   })
+
+  it('round-trips parseCronToFields output for a standard expression', () => {
+    const expr = '0 9 * * 1'
+    expect(buildCronFromFields(parseCronToFields(expr))).toBe(expr)
+  })
 })

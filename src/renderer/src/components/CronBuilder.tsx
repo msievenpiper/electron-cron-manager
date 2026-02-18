@@ -44,7 +44,7 @@ export default function CronBuilder({ value, onChange }: Props) {
   try { cronDescription = cronstrue.toString(value) } catch { cronDescription = 'Invalid cron expression' }
 
   const fields = parseCronToFields(value)
-  const currentPresetExpr = PRESETS.find(p => p.expr === value)?.expr ?? null
+  const currentPresetExpr = PRESETS.some(p => p.expr === value) ? value : null
 
   const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = e.target.value
@@ -90,7 +90,7 @@ export default function CronBuilder({ value, onChange }: Props) {
             className="bg-gray-800 rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
           >
             {PRESETS.map(p => (
-              <option key={p.label} value={p.expr ?? '__custom__'} disabled={p.expr === null}>{p.label}</option>
+              <option key={p.label} value={p.expr ?? '__custom__'}>{p.label}</option>
             ))}
           </select>
 
@@ -109,7 +109,14 @@ export default function CronBuilder({ value, onChange }: Props) {
                     placeholder="*"
                     onChange={e => {
                       const raw = e.target.value
-                      handleFieldChange(key, raw === '' ? '*' : raw)
+                      if (raw === '') {
+                        handleFieldChange(key, '*')
+                      } else {
+                        const num = parseInt(raw, 10)
+                        if (!isNaN(num)) {
+                          handleFieldChange(key, String(Math.min(max, Math.max(min, num))))
+                        }
+                      }
                     }}
                     className="bg-gray-800 rounded px-2 py-1.5 text-sm text-center outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-40 w-full"
                   />
