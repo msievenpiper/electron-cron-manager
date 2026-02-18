@@ -21,6 +21,10 @@ export class SchedulerEngine {
     this.callbacks = callbacks
   }
 
+  setCallbacks(callbacks: SchedulerCallbacks): void {
+    this.callbacks = callbacks
+  }
+
   start(jobs: Job[]): void {
     for (const job of jobs) {
       if (job.enabled) this.scheduleJob(job)

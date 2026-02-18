@@ -1,22 +1,29 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
+import { IPC } from '../shared/ipc-channels'
 
-// Custom APIs for renderer
-const api = {}
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
-}
+contextBridge.exposeInMainWorld('cronManager', {
+  jobs: {
+    list: () => ipcRenderer.invoke(IPC.JOBS_LIST),
+    create: (input: unknown) => ipcRenderer.invoke(IPC.JOBS_CREATE, input),
+    update: (id: string, input: unknown) => ipcRenderer.invoke(IPC.JOBS_UPDATE, id, input),
+    delete: (id: string) => ipcRenderer.invoke(IPC.JOBS_DELETE, id),
+    runNow: (id: string) => ipcRenderer.invoke(IPC.JOBS_RUN_NOW, id),
+    kill: (id: string) => ipcRenderer.invoke(IPC.JOBS_KILL, id),
+  },
+  runs: {
+    list: () => ipcRenderer.invoke(IPC.RUNS_LIST),
+    listByJob: (jobId: string) => ipcRenderer.invoke(IPC.RUNS_LIST_BY_JOB, jobId),
+  },
+  settings: {
+    get: (key: string) => ipcRenderer.invoke(IPC.SETTINGS_GET, key),
+    set: (key: string, value: string) => ipcRenderer.invoke(IPC.SETTINGS_SET, key, value),
+  },
+  on: {
+    jobStarted: (cb: (jobId: string) => void) => {
+      ipcRenderer.on(IPC.JOB_STARTED, (_e, jobId) => cb(jobId))
+    },
+    jobFinished: (cb: (jobId: string) => void) => {
+      ipcRenderer.on(IPC.JOB_FINISHED, (_e, jobId) => cb(jobId))
+    },
+  },
+})
