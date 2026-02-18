@@ -25,6 +25,7 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "better-sqlite3": "^12.6.2",
+    "cron-parser": "^5.5.0",
     "cronstrue": "^3.12.0",
     "date-fns": "^4.1.0",
     "node-cron": "^4.2.1",
