@@ -10,11 +10,15 @@ const JOB_COLORS = [
   'border-pink-500 bg-pink-500/20 text-pink-300',
 ]
 
-interface Props { jobs: Job[] }
+interface Props { jobs: Job[]; initialDate?: Date }
 
-export default function CalendarTimelineView({ jobs }: Props) {
+export default function CalendarTimelineView({ jobs, initialDate }: Props) {
   const today = new Date()
-  const [date, setDate] = useState(new Date(today.getFullYear(), today.getMonth(), today.getDate()))
+  const [date, setDate] = useState(
+    initialDate
+      ? new Date(initialDate.getFullYear(), initialDate.getMonth(), initialDate.getDate())
+      : new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  )
 
   const goDay = (delta: number) => {
     const d = new Date(date)
