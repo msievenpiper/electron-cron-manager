@@ -24,7 +24,8 @@ export default function HistoryPage() {
 
   useEffect(() => {
     refresh()
-    window.cronManager.on.jobFinished(() => refresh())
+    const cleanup = window.cronManager.on.jobFinished(() => refresh())
+    return cleanup
   }, [refresh])
 
   return (

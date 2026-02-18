@@ -6,6 +6,14 @@ import { SchedulerEngine } from './scheduler'
 import { ExecuteResult } from './executor'
 import Database from 'better-sqlite3'
 
+const ALLOWED_INTERPRETERS = ['bash', 'sh', 'zsh', 'node', 'python3', 'ruby'] as const
+
+function validateJobInput(input: any): void {
+  if (input.interpreter && !ALLOWED_INTERPRETERS.includes(input.interpreter)) {
+    throw new Error(`Invalid interpreter: ${input.interpreter}`)
+  }
+}
+
 export function registerIpcHandlers(
   db: Database.Database,
   scheduler: SchedulerEngine,
@@ -20,17 +28,20 @@ export function registerIpcHandlers(
     return parseInt(row?.value ?? '100', 10)
   }
 
-  // Wire scheduler callbacks via public setCallbacks method
-  scheduler.setCallbacks({
+  const activeRunIds = new Map<string, string>() // jobId → DB run id
+
+  const origCallbacks = {
     onJobStart: (jobId: string, _runId: string) => {
-      runRepo.start(jobId)
+      const run = runRepo.start(jobId)
+      activeRunIds.set(jobId, run.id)
       getWindow()?.webContents.send(IPC.JOB_STARTED, jobId)
       onStatusChange?.()
     },
     onJobFinish: (jobId: string, _runId: string, result: ExecuteResult) => {
-      const activeRun = runRepo.findByJobId(jobId, 1).find(r => r.status === 'running')
-      if (activeRun) {
-        runRepo.finish(activeRun.id, result)
+      const runId = activeRunIds.get(jobId)
+      activeRunIds.delete(jobId)
+      if (runId) {
+        runRepo.finish(runId, result)
         runRepo.prune(jobId, maxRunsPerJob())
         const job = jobRepo.findById(jobId)
         if (job && (job.notify === 'all' || (job.notify === 'failure' && result.status === 'failure'))) {
@@ -40,16 +51,22 @@ export function registerIpcHandlers(
       getWindow()?.webContents.send(IPC.JOB_FINISHED, jobId)
       onStatusChange?.()
     },
-  })
+  }
+
+  // Wire scheduler callbacks via public setCallbacks method
+  scheduler.setCallbacks(origCallbacks)
 
   ipcMain.handle(IPC.JOBS_LIST, () => jobRepo.findAll())
   ipcMain.handle(IPC.JOBS_CREATE, (_e, input) => {
+    validateJobInput(input)
     const job = jobRepo.create(input)
     scheduler.addJob(job)
     return job
   })
   ipcMain.handle(IPC.JOBS_UPDATE, (_e, id, input) => {
+    validateJobInput(input)
     const job = jobRepo.update(id, input)
+    // addJob handles both enable and disable: removes old schedule, reschedules only if enabled
     if (job) scheduler.addJob(job)
     return job
   })

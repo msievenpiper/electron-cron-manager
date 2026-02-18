@@ -1,8 +1,2 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
-
-declare global {
-  interface Window {
-    electron: ElectronAPI
-    api: unknown
-  }
-}
+// Types for the cronManager bridge are declared in src/renderer/src/types/window.d.ts
+export {}

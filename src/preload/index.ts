@@ -1,3 +1,4 @@
+import type { IpcRendererEvent } from 'electron'
 import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc-channels'
 
@@ -20,10 +21,14 @@ contextBridge.exposeInMainWorld('cronManager', {
   },
   on: {
     jobStarted: (cb: (jobId: string) => void) => {
-      ipcRenderer.on(IPC.JOB_STARTED, (_e, jobId) => cb(jobId))
+      const handler = (_e: IpcRendererEvent, jobId: string) => cb(jobId)
+      ipcRenderer.on(IPC.JOB_STARTED, handler)
+      return () => ipcRenderer.removeListener(IPC.JOB_STARTED, handler)
     },
     jobFinished: (cb: (jobId: string) => void) => {
-      ipcRenderer.on(IPC.JOB_FINISHED, (_e, jobId) => cb(jobId))
+      const handler = (_e: IpcRendererEvent, jobId: string) => cb(jobId)
+      ipcRenderer.on(IPC.JOB_FINISHED, handler)
+      return () => ipcRenderer.removeListener(IPC.JOB_FINISHED, handler)
     },
   },
 })

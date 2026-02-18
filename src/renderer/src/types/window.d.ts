@@ -18,8 +18,8 @@ interface CronManagerAPI {
     set: (key: string, value: string) => Promise<void>
   }
   on: {
-    jobStarted: (cb: (jobId: string) => void) => void
-    jobFinished: (cb: (jobId: string) => void) => void
+    jobStarted: (cb: (jobId: string) => void) => (() => void)
+    jobFinished: (cb: (jobId: string) => void) => (() => void)
   }
 }
 
