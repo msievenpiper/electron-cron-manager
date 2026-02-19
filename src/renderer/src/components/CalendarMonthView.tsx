@@ -80,22 +80,31 @@ export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
         {cells.map((day, i) => {
           if (!day) return <div key={`empty-${i}`} />
           const jobEntries = dayJobMap.get(day) ?? []
-          const jobIndices = jobEntries.map(e => e.jobIdx)
           return (
             <button
               key={day}
               onClick={() => onDaySelect(new Date(year, month, day))}
               className={[
-                'aspect-square rounded flex flex-col items-center justify-start p-1 text-xs transition-colors cursor-pointer',
+                'aspect-[4/5] rounded flex flex-col items-start justify-start p-1 text-xs transition-colors cursor-pointer',
                 isToday(day) ? 'bg-blue-900/40 text-blue-300' : 'hover:bg-gray-800 text-gray-200',
               ].join(' ')}
             >
               <span className="leading-none">{day}</span>
-              {jobIndices.length > 0 && (
-                <div className="flex flex-wrap gap-0.5 justify-center mt-1">
-                  {jobIndices.slice(0, 5).map(ji => (
-                    <div key={ji} className={`w-1.5 h-1.5 rounded-full ${JOB_COLORS[ji % JOB_COLORS.length]}`} />
+              {jobEntries.length > 0 && (
+                <div className="w-full mt-1 flex flex-col gap-px">
+                  {jobEntries.slice(0, 5).map(({ jobIdx, hours }) => (
+                    <div key={jobIdx} className="flex gap-px w-full">
+                      {Array.from({ length: 24 }, (_, h) => (
+                        <div
+                          key={h}
+                          className={`flex-1 h-[3px] rounded-sm ${hours.has(h) ? JOB_COLORS[jobIdx % JOB_COLORS.length] : 'bg-gray-800'}`}
+                        />
+                      ))}
+                    </div>
                   ))}
+                  {jobEntries.length > 5 && (
+                    <span className="text-gray-600 text-[9px] leading-none mt-0.5">+{jobEntries.length - 5}</span>
+                  )}
                 </div>
               )}
             </button>
