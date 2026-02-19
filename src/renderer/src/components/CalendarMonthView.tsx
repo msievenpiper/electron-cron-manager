@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Job } from '../../../shared/types'
 import { getRunDatesInMonth } from '../utils/schedule'
 
@@ -32,23 +32,29 @@ export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
   const firstDow = new Date(year, month, 1).getDay() // 0=Sun
 
   // Build day → jobs map
-  const dayJobMap = new Map<number, DayJobEntry[]>()
+  const dayJobMap = useMemo(() => {
+    // day → jobIdx → entry (for O(1) lookup during build)
+    const buildMap = new Map<number, Map<number, DayJobEntry>>()
 
-  jobs.forEach((job, jobIdx) => {
-    const dates = getRunDatesInMonth(job.cron, year, month)
-    dates.forEach(d => {
-      const day = d.getDate()
-      const hour = d.getHours()
-      if (!dayJobMap.has(day)) dayJobMap.set(day, [])
-      const entries = dayJobMap.get(day)!
-      let entry = entries.find(e => e.jobIdx === jobIdx)
-      if (!entry) {
-        entry = { jobIdx, hours: new Set() }
-        entries.push(entry)
-      }
-      entry.hours.add(hour)
+    jobs.forEach((job, jobIdx) => {
+      const dates = getRunDatesInMonth(job.cron, year, month)
+      dates.forEach(d => {
+        const day = d.getDate()
+        const hour = d.getHours()
+        if (!buildMap.has(day)) buildMap.set(day, new Map())
+        const jobMap = buildMap.get(day)!
+        if (!jobMap.has(jobIdx)) jobMap.set(jobIdx, { jobIdx, hours: new Set() })
+        jobMap.get(jobIdx)!.hours.add(hour)
+      })
     })
-  })
+
+    // Convert inner Maps to arrays
+    const result = new Map<number, DayJobEntry[]>()
+    buildMap.forEach((jobMap, day) => {
+      result.set(day, Array.from(jobMap.values()))
+    })
+    return result
+  }, [jobs, year, month])
 
   const cells: (number | null)[] = [
     ...Array(firstDow).fill(null),
@@ -103,7 +109,7 @@ export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
                     </div>
                   ))}
                   {jobEntries.length > 5 && (
-                    <span className="text-gray-600 text-[9px] leading-none mt-0.5">+{jobEntries.length - 5}</span>
+                    <span className="text-gray-400 text-[9px] leading-none mt-0.5">+{jobEntries.length - 5}</span>
                   )}
                 </div>
               )}
