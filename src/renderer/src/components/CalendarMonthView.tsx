@@ -30,13 +30,22 @@ export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
   const firstDow = new Date(year, month, 1).getDay() // 0=Sun
 
   // Build day → jobs map
-  const dayJobMap = new Map<number, Set<number>>() // day → Set of job indices
+  type DayJobEntry = { jobIdx: number; hours: Set<number> }
+  const dayJobMap = new Map<number, DayJobEntry[]>()
+
   jobs.forEach((job, jobIdx) => {
     const dates = getRunDatesInMonth(job.cron, year, month)
     dates.forEach(d => {
       const day = d.getDate()
-      if (!dayJobMap.has(day)) dayJobMap.set(day, new Set())
-      dayJobMap.get(day)!.add(jobIdx)
+      const hour = d.getHours()
+      if (!dayJobMap.has(day)) dayJobMap.set(day, [])
+      const entries = dayJobMap.get(day)!
+      let entry = entries.find(e => e.jobIdx === jobIdx)
+      if (!entry) {
+        entry = { jobIdx, hours: new Set() }
+        entries.push(entry)
+      }
+      entry.hours.add(hour)
     })
   })
 
@@ -69,7 +78,8 @@ export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
       <div className="grid grid-cols-7 gap-1">
         {cells.map((day, i) => {
           if (!day) return <div key={`empty-${i}`} />
-          const jobIndices = Array.from(dayJobMap.get(day) ?? [])
+          const jobEntries = dayJobMap.get(day) ?? []
+          const jobIndices = jobEntries.map(e => e.jobIdx)
           return (
             <button
               key={day}
