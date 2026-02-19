@@ -12,6 +12,8 @@ const JOB_COLORS = [
 
 interface Props { jobs: Job[]; onDaySelect: (date: Date) => void }
 
+type DayJobEntry = { jobIdx: number; hours: Set<number> }
+
 export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
@@ -30,7 +32,6 @@ export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
   const firstDow = new Date(year, month, 1).getDay() // 0=Sun
 
   // Build day → jobs map
-  type DayJobEntry = { jobIdx: number; hours: Set<number> }
   const dayJobMap = new Map<number, DayJobEntry[]>()
 
   jobs.forEach((job, jobIdx) => {
