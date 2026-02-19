@@ -6,6 +6,10 @@ import { JobRepository } from './db/jobs'
 import { SchedulerEngine } from './scheduler'
 import { registerIpcHandlers } from './ipc-handlers'
 
+// Pin userData to a stable path so data survives updates regardless of how
+// the app name resolves (dev binary vs packaged build, productName changes, etc.)
+app.setPath('userData', join(app.getPath('appData'), 'Cron Manager'))
+
 function trayIconPath(filename: string): string {
   return app.isPackaged
     ? join(process.resourcesPath, filename)
@@ -45,6 +49,7 @@ function updateTrayMenu(): void {
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
+    title: 'Cron Manager',
     width: 900,
     height: 650,
     show: false,
