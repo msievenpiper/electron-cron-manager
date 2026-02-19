@@ -62,9 +62,24 @@ export class SchedulerEngine {
     return this.executeJob(job)
   }
 
+  // node-cron v4 doesn't support the N/M (start/step) syntax used in Quartz/Spring cron.
+  // It ignores the step and only uses the start value, so 0/10 fires only at :00 not :00,:10,...
+  // Normalize N/M → N-MAX/M so node-cron handles it as intended.
+  private normalizeExpression(expr: string): string {
+    const fields = expr.trim().split(/\s+/)
+    const isSixField = fields.length === 6
+    // Maxes indexed from the first field: [second, minute, hour, dom, month, dow]
+    const maxes = [59, 59, 23, 31, 12, 6]
+    const offset = isSixField ? 0 : 1
+    return fields
+      .map((field, i) => field.replace(/^(\d+)\/(\d+)$/, (_, n, m) => `${n}-${maxes[i + offset]}/${m}`))
+      .join(' ')
+  }
+
   private scheduleJob(job: Job): void {
     if (!cron.validate(job.cron)) return
-    const task = cron.schedule(job.cron, () => this.executeJob(job))
+    const normalized = this.normalizeExpression(job.cron)
+    const task = cron.schedule(normalized, () => this.executeJob(job))
     this.tasks.set(job.id, task)
   }
 

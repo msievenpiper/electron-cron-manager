@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import CronExpressionParser from 'cron-parser'
 import { Job, Interpreter, NotifySetting } from '../../../shared/types'
 import CronBuilder from './CronBuilder'
 
@@ -18,6 +19,9 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
   const [notify, setNotify] = useState<NotifySetting>(job?.notify ?? 'failure')
   const [enabled, setEnabled] = useState(job?.enabled ?? true)
   const [saving, setSaving] = useState(false)
+
+  let cronValid = true
+  try { CronExpressionParser.parse(cronExpr) } catch { cronValid = false }
 
   const handleRunNow = async () => {
     if (job) await window.cronManager.jobs.runNow(job.id)
@@ -118,7 +122,7 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
           )}
           <button
             onClick={handleSave}
-            disabled={saving || !name.trim() || !command.trim()}
+            disabled={saving || !name.trim() || !command.trim() || !cronValid}
             className="ml-auto px-4 py-1.5 bg-blue-600 hover:bg-blue-500 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving…' : 'Save'}

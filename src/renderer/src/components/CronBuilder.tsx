@@ -1,6 +1,7 @@
 // src/renderer/src/components/CronBuilder.tsx
 import { useState } from 'react'
 import cronstrue from 'cronstrue'
+import CronExpressionParser from 'cron-parser'
 import { parseCronToFields, buildCronFromFields, CronFields } from '../utils/cronFields'
 
 interface Props {
@@ -41,7 +42,14 @@ export default function CronBuilder({ value, onChange }: Props) {
   const [mode, setMode] = useState<'simple' | 'advanced'>('simple')
 
   let cronDescription = ''
-  try { cronDescription = cronstrue.toString(value) } catch { cronDescription = 'Invalid cron expression' }
+  let isCronValid = true
+  try {
+    CronExpressionParser.parse(value)
+    try { cronDescription = cronstrue.toString(value) } catch { cronDescription = value }
+  } catch {
+    isCronValid = false
+    cronDescription = 'Invalid cron expression'
+  }
 
   const fields = parseCronToFields(value)
   const currentPresetExpr = PRESETS.some(p => p.expr === value) ? value : null
@@ -148,11 +156,11 @@ export default function CronBuilder({ value, onChange }: Props) {
         <input
           value={value}
           onChange={e => onChange(e.target.value)}
-          className="bg-gray-800 rounded px-3 py-2 text-sm font-mono outline-none focus:ring-1 focus:ring-blue-500"
+          className={`bg-gray-800 rounded px-3 py-2 text-sm font-mono outline-none focus:ring-1 ${!isCronValid ? 'border border-red-500 focus:ring-red-500' : 'focus:ring-blue-500'}`}
         />
       )}
 
-      <span className="text-xs text-gray-400">{cronDescription}</span>
+      <span className={`text-xs ${isCronValid ? 'text-gray-400' : 'text-red-400'}`}>{cronDescription}</span>
     </div>
   )
 }
