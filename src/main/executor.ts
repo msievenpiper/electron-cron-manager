@@ -13,9 +13,33 @@ export interface ExecuteHandle {
   kill: () => void
 }
 
-export function executeJobWithHandle(opts: { interpreter: string; command: string }): ExecuteHandle {
+export async function resolveJobEnv(sourceShellConfig: boolean): Promise<NodeJS.ProcessEnv> {
+  if (!sourceShellConfig) return process.env
+
+  const shell = process.env.SHELL || '/bin/zsh'
+
+  return new Promise((resolve) => {
+    const proc = spawn(shell, ['-l', '-c', 'env'], { env: process.env })
+    let output = ''
+
+    proc.stdout.on('data', (d: Buffer) => { output += d.toString() })
+    proc.on('close', () => {
+      const env: NodeJS.ProcessEnv = {}
+      for (const line of output.split('\n')) {
+        const eq = line.indexOf('=')
+        if (eq > 0) {
+          env[line.slice(0, eq)] = line.slice(eq + 1)
+        }
+      }
+      resolve(Object.keys(env).length > 0 ? env : process.env)
+    })
+    proc.on('error', () => resolve(process.env))
+  })
+}
+
+export function executeJobWithHandle(opts: { interpreter: string; command: string; env?: NodeJS.ProcessEnv }): ExecuteHandle {
   let killed = false
-  const proc = spawn(opts.interpreter, ['-c', opts.command], { env: process.env })
+  const proc = spawn(opts.interpreter, ['-c', opts.command], { env: opts.env ?? process.env })
 
   let stdout = ''
   let stderr = ''
@@ -42,6 +66,6 @@ export function executeJobWithHandle(opts: { interpreter: string; command: strin
   }
 }
 
-export async function executeJob(opts: { interpreter: string; command: string }): Promise<ExecuteResult> {
+export async function executeJob(opts: { interpreter: string; command: string; env?: NodeJS.ProcessEnv }): Promise<ExecuteResult> {
   return executeJobWithHandle(opts).promise
 }
