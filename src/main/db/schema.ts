@@ -7,6 +7,7 @@ export const SCHEMA = `
     command     TEXT NOT NULL,
     enabled     INTEGER DEFAULT 1,
     notify      TEXT DEFAULT 'failure',
+    source_shell_config INTEGER DEFAULT 1,
     created_at  INTEGER NOT NULL,
     updated_at  INTEGER NOT NULL
   );

@@ -26,4 +26,11 @@ describe('createDatabase', () => {
     const row = db.prepare("SELECT value FROM settings WHERE key='max_runs_per_job'").get() as any
     expect(row.value).toBe('100')
   })
+
+  it('jobs table has source_shell_config column defaulting to 1', () => {
+    const info = db.prepare("PRAGMA table_info(jobs)").all() as any[]
+    const col = info.find(c => c.name === 'source_shell_config')
+    expect(col).toBeTruthy()
+    expect(col.dflt_value).toBe('1')
+  })
 })
