@@ -1,6 +1,6 @@
 import cron from 'node-cron'
 import { Job } from '../shared/types'
-import { executeJobWithHandle, ExecuteResult } from './executor'
+import { executeJobWithHandle, ExecuteResult, resolveJobEnv } from './executor'
 
 interface SchedulerCallbacks {
   onJobStart: (jobId: string, runId: string) => void
@@ -88,8 +88,9 @@ export class SchedulerEngine {
       return { stdout: '', stderr: 'Already running', exit_code: -1, status: 'failure' }
     }
 
+    const env = await resolveJobEnv(job.source_shell_config)
     const runId = `${job.id}-${Date.now()}`
-    const { promise, kill } = executeJobWithHandle({ interpreter: job.interpreter, command: job.command })
+    const { promise, kill } = executeJobWithHandle({ interpreter: job.interpreter, command: job.command, env })
     this.activeRuns.set(job.id, { runId, kill })
     this.callbacks.onJobStart(job.id, runId)
 
