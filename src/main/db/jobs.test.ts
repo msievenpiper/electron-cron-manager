@@ -43,4 +43,20 @@ describe('JobRepository', () => {
     repo.delete(job.id)
     expect(repo.findById(job.id)).toBeUndefined()
   })
+
+  it('defaults source_shell_config to true when not specified', () => {
+    const job = repo.create({ name: 'Test', cron: '* * * * *', interpreter: 'bash', command: 'echo hi' })
+    expect(job.source_shell_config).toBe(true)
+  })
+
+  it('persists source_shell_config: false', () => {
+    const job = repo.create({ name: 'Test', cron: '* * * * *', interpreter: 'bash', command: 'echo hi', source_shell_config: false })
+    expect(job.source_shell_config).toBe(false)
+  })
+
+  it('updates source_shell_config', () => {
+    const job = repo.create({ name: 'Test', cron: '* * * * *', interpreter: 'bash', command: 'echo hi' })
+    const updated = repo.update(job.id, { source_shell_config: false })
+    expect(updated?.source_shell_config).toBe(false)
+  })
 })
