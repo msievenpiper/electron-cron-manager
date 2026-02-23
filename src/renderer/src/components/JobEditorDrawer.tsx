@@ -18,6 +18,7 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
   const [command, setCommand] = useState(job?.command ?? '')
   const [notify, setNotify] = useState<NotifySetting>(job?.notify ?? 'failure')
   const [enabled, setEnabled] = useState(job?.enabled ?? true)
+  const [sourceShellConfig, setSourceShellConfig] = useState(job?.source_shell_config ?? true)
   const [saving, setSaving] = useState(false)
 
   let cronValid = true
@@ -32,9 +33,9 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
     setSaving(true)
     try {
       if (job) {
-        await window.cronManager.jobs.update(job.id, { name, cron: cronExpr, interpreter, command, notify, enabled })
+        await window.cronManager.jobs.update(job.id, { name, cron: cronExpr, interpreter, command, notify, enabled, source_shell_config: sourceShellConfig })
       } else {
-        await window.cronManager.jobs.create({ name, cron: cronExpr, interpreter, command, notify, enabled })
+        await window.cronManager.jobs.create({ name, cron: cronExpr, interpreter, command, notify, enabled, source_shell_config: sourceShellConfig })
       }
       onSave()
       onClose()
@@ -109,6 +110,19 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
             className="w-4 h-4"
           />
           Enabled
+        </label>
+
+        <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={sourceShellConfig}
+            onChange={e => setSourceShellConfig(e.target.checked)}
+            className="w-4 h-4"
+          />
+          <span>
+            Source shell config
+            <span className="text-gray-500 ml-1 text-xs">(~/.zshrc, ~/.bash_profile)</span>
+          </span>
         </label>
 
         <div className="flex gap-2 mt-auto pt-4 border-t border-gray-800">
