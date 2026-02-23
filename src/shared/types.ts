@@ -9,6 +9,7 @@ export interface Job {
   command: string
   enabled: boolean
   notify: NotifySetting
+  source_shell_config: boolean
   created_at: number
   updated_at: number
 }
@@ -33,6 +34,7 @@ export interface CreateJobInput {
   command: string
   enabled?: boolean
   notify?: NotifySetting
+  source_shell_config?: boolean
 }
 
 export interface UpdateJobInput extends Partial<CreateJobInput> {}
