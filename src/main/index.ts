@@ -18,13 +18,7 @@ function trayIconPath(filename: string): string {
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
-
-const db = createDatabase(join(app.getPath('userData'), 'cron-manager.db'))
-const jobRepo = new JobRepository(db)
-const scheduler = new SchedulerEngine({
-  onJobStart: () => {},
-  onJobFinish: () => {},
-})
+let scheduler: SchedulerEngine
 
 function updateTrayMenu(): void {
   if (!tray) return
@@ -82,6 +76,13 @@ app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.cronmanager')
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+  })
+
+  const db = createDatabase(join(app.getPath('userData'), 'cron-manager.db'))
+  const jobRepo = new JobRepository(db)
+  scheduler = new SchedulerEngine({
+    onJobStart: () => {},
+    onJobFinish: () => {},
   })
 
   createWindow()
