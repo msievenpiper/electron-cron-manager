@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3'
 import { v4 as uuidv4 } from 'uuid'
-import { Run, RunStatus } from '../../shared/types'
+import { Run, RunStats, RunStatus } from '../../shared/types'
 
 function rowToRun(row: any): Run {
   return row as Run
@@ -48,6 +48,27 @@ export class RunRepository {
         SELECT id FROM runs WHERE job_id = ? ORDER BY started_at DESC LIMIT ?
       )
     `).run(jobId, jobId, maxRuns)
+  }
+
+  getStats(windowMs: number): RunStats {
+    const since = Date.now() - windowMs
+    const rows = this.db.prepare(`
+      SELECT status, COUNT(*) as count
+      FROM runs
+      WHERE started_at > ? AND status IN ('success', 'failure')
+      GROUP BY status
+    `).all(since) as { status: string; count: number }[]
+
+    const runningRow = this.db.prepare(
+      `SELECT COUNT(*) as count FROM runs WHERE status = 'running'`
+    ).get() as { count: number }
+
+    const result: RunStats = { success: 0, failure: 0, running: runningRow.count }
+    for (const row of rows) {
+      if (row.status === 'success') result.success = row.count
+      if (row.status === 'failure') result.failure = row.count
+    }
+    return result
   }
 
   markKilled(id: string): void {

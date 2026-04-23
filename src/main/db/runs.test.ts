@@ -46,4 +46,46 @@ describe('RunRepository', () => {
     runs.prune(jobId, 3)
     expect(runs.findByJobId(jobId)).toHaveLength(3)
   })
+
+  describe('getStats', () => {
+    it('counts success and failure runs within window', () => {
+      const now = Date.now()
+      const windowMs = 24 * 60 * 60 * 1000
+
+      db.prepare(`INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run('r1', jobId, now - 1000, now, 0, '', '', 'success')
+      db.prepare(`INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run('r2', jobId, now - 2000, now, 1, '', '', 'failure')
+      db.prepare(`INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run('r3', jobId, now - windowMs - 1000, now, 0, '', '', 'success') // outside window
+
+      const stats = runs.getStats(windowMs)
+      expect(stats.success).toBe(1)
+      expect(stats.failure).toBe(1)
+      expect(stats.running).toBe(0)
+    })
+
+    it('counts running jobs regardless of time window', () => {
+      const now = Date.now()
+      const windowMs = 24 * 60 * 60 * 1000
+
+      // Started 2 days ago — outside the 24h window — but still running
+      db.prepare(`INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run('r1', jobId, now - 2 * windowMs, null, null, null, null, 'running')
+
+      const stats = runs.getStats(windowMs)
+      expect(stats.running).toBe(1)
+      expect(stats.success).toBe(0)
+      expect(stats.failure).toBe(0)
+    })
+
+    it('returns zeros when no runs exist', () => {
+      const stats = runs.getStats(24 * 60 * 60 * 1000)
+      expect(stats).toEqual({ success: 0, failure: 0, running: 0 })
+    })
+  })
 })
