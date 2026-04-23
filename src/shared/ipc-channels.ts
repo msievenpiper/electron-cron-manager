@@ -10,6 +10,7 @@ export const IPC = {
   // Runs
   RUNS_LIST:        'runs:list',
   RUNS_LIST_BY_JOB: 'runs:listByJob',
+  RUNS_STATS:       'runs:stats',
 
   // Settings
   SETTINGS_GET: 'settings:get',

@@ -38,3 +38,9 @@ export interface CreateJobInput {
 }
 
 export interface UpdateJobInput extends Partial<CreateJobInput> {}
+
+export interface RunStats {
+  success: number
+  failure: number
+  running: number
+}
