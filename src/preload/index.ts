@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('cronManager', {
   runs: {
     list: () => ipcRenderer.invoke(IPC.RUNS_LIST),
     listByJob: (jobId: string) => ipcRenderer.invoke(IPC.RUNS_LIST_BY_JOB, jobId),
+    stats: (window: '24h' | '7d' | '30d') => ipcRenderer.invoke(IPC.RUNS_STATS, window),
   },
   settings: {
     get: (key: string) => ipcRenderer.invoke(IPC.SETTINGS_GET, key),

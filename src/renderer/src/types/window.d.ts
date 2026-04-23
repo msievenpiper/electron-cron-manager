@@ -1,4 +1,4 @@
-import { Job, Run, CreateJobInput, UpdateJobInput } from '../../../shared/types'
+import { Job, Run, RunStats, CreateJobInput, UpdateJobInput } from '../../../shared/types'
 
 interface CronManagerAPI {
   jobs: {
@@ -12,6 +12,7 @@ interface CronManagerAPI {
   runs: {
     list: () => Promise<Run[]>
     listByJob: (jobId: string) => Promise<Run[]>
+    stats: (window: '24h' | '7d' | '30d') => Promise<RunStats>
   }
   settings: {
     get: (key: string) => Promise<string | undefined>

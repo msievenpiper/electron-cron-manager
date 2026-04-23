@@ -81,6 +81,14 @@ export function registerIpcHandlers(
   ipcMain.handle(IPC.JOBS_KILL, (_e, id) => scheduler.killJob(id))
   ipcMain.handle(IPC.RUNS_LIST, () => runRepo.findAll())
   ipcMain.handle(IPC.RUNS_LIST_BY_JOB, (_e, jobId) => runRepo.findByJobId(jobId))
+  ipcMain.handle(IPC.RUNS_STATS, (_e, window: '24h' | '7d' | '30d') => {
+    const ms: Record<string, number> = {
+      '24h': 24 * 60 * 60 * 1000,
+      '7d':  7 * 24 * 60 * 60 * 1000,
+      '30d': 30 * 24 * 60 * 60 * 1000,
+    }
+    return runRepo.getStats(ms[window] ?? ms['24h'])
+  })
   ipcMain.handle(IPC.SETTINGS_GET, (_e, key) => {
     return (db.prepare('SELECT value FROM settings WHERE key=?').get(key) as any)?.value
   })
