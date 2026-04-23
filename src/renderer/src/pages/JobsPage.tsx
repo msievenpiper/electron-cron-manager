@@ -28,6 +28,10 @@ export default function JobsPage() {
     }
   }
 
+  const handleRunNow = async (job: Job) => {
+    await window.cronManager.jobs.runNow(job.id)
+  }
+
   return (
     <div className="p-4 flex-1 min-h-0 overflow-auto">
       <div className="flex justify-between items-center mb-4">
@@ -78,6 +82,15 @@ export default function JobsPage() {
                     <button onClick={() => toggleEnabled(job)} className="text-xs text-gray-400 hover:text-white">
                       {job.enabled ? 'Disable' : 'Enable'}
                     </button>
+                    {!isRunning && (
+                      <button
+                        onClick={() => handleRunNow(job)}
+                        title={`Run ${job.name} now`}
+                        className="text-xs text-green-500 hover:text-green-400"
+                      >
+                        ▶
+                      </button>
+                    )}
                     <button onClick={() => setEditingJob(job)} className="text-xs text-blue-400 hover:text-blue-300">Edit</button>
                     {isRunning && (
                       <button onClick={() => handleKill(job)} className="text-xs text-yellow-400 hover:text-yellow-300">Kill</button>
