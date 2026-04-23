@@ -1,17 +1,18 @@
 import { useState } from 'react'
+import HomePage from '../pages/HomePage'
 import JobsPage from '../pages/JobsPage'
 import CalendarPage from '../pages/CalendarPage'
 import HistoryPage from '../pages/HistoryPage'
 
-type Tab = 'jobs' | 'calendar' | 'history'
+type Tab = 'home' | 'jobs' | 'calendar' | 'history'
 
 export default function Layout() {
-  const [tab, setTab] = useState<Tab>('jobs')
+  const [tab, setTab] = useState<Tab>('home')
 
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-gray-100">
       <nav className="flex border-b border-gray-800 px-4">
-        {(['jobs', 'calendar', 'history'] as Tab[]).map(t => (
+        {(['home', 'jobs', 'calendar', 'history'] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -26,9 +27,10 @@ export default function Layout() {
         ))}
       </nav>
       <main className="flex-1 overflow-hidden flex flex-col">
-        {tab === 'jobs' && <JobsPage />}
+        {tab === 'home'     && <HomePage />}
+        {tab === 'jobs'     && <JobsPage />}
         {tab === 'calendar' && <CalendarPage />}
-        {tab === 'history' && <HistoryPage />}
+        {tab === 'history'  && <HistoryPage />}
       </main>
     </div>
   )
