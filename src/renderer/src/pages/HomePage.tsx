@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import cronstrue from 'cronstrue'
 import { Job, Run, RunStats } from '../../../shared/types'
 import { useJobs } from '../hooks/useJobs'
@@ -32,7 +32,7 @@ function countByDayAndStatus(runs: Run[], day: Date, status: Run['status']): num
   return runs.filter((r) => r.status === status && isSameDay(new Date(r.started_at), day)).length
 }
 
-export default function HomePage() {
+export default function HomePage(): ReactElement {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>('7d')
   const [stats, setStats] = useState<RunStats>({ success: 0, failure: 0, running: 0 })
   const [runs, setRuns] = useState<Run[]>([])

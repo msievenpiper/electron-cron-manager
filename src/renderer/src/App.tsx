@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import Layout from './components/Layout'
 import OnboardingFlow from './pages/OnboardingFlow'
 
-export default function App() {
+export default function App(): ReactElement | null {
   const [hasOnboarded, setHasOnboarded] = useState<boolean | null>(null)
 
   useEffect(() => {

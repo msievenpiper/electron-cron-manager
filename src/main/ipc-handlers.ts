@@ -4,11 +4,12 @@ import { JobRepository } from './db/jobs'
 import { RunRepository } from './db/runs'
 import { SchedulerEngine } from './scheduler'
 import { ExecuteResult } from './executor'
+import { CreateJobInput, UpdateJobInput } from '../shared/types'
 import Database from 'better-sqlite3'
 
 const ALLOWED_INTERPRETERS = ['bash', 'sh', 'zsh', 'node', 'python3', 'ruby'] as const
 
-function validateJobInput(input: any): void {
+function validateJobInput(input: CreateJobInput | UpdateJobInput): void {
   if (input.interpreter && !ALLOWED_INTERPRETERS.includes(input.interpreter)) {
     throw new Error(`Invalid interpreter: ${input.interpreter}`)
   }
@@ -24,20 +25,21 @@ export function registerIpcHandlers(
   const runRepo = new RunRepository(db)
 
   const maxRunsPerJob = (): number => {
-    const row = db.prepare("SELECT value FROM settings WHERE key='max_runs_per_job'").get() as any
+    const row = db.prepare("SELECT value FROM settings WHERE key='max_runs_per_job'").get() as
+      { value: string } | undefined
     return parseInt(row?.value ?? '100', 10)
   }
 
   const activeRunIds = new Map<string, string>() // jobId → DB run id
 
   const origCallbacks = {
-    onJobStart: (jobId: string, _runId: string) => {
+    onJobStart: (jobId: string, _runId: string): void => {
       const run = runRepo.start(jobId)
       activeRunIds.set(jobId, run.id)
       getWindow()?.webContents.send(IPC.JOB_STARTED, jobId)
       onStatusChange?.()
     },
-    onJobFinish: (jobId: string, _runId: string, result: ExecuteResult) => {
+    onJobFinish: (jobId: string, _runId: string, result: ExecuteResult): void => {
       const runId = activeRunIds.get(jobId)
       activeRunIds.delete(jobId)
       if (runId) {
@@ -96,7 +98,9 @@ export function registerIpcHandlers(
     return runRepo.getStats(ms[window] ?? ms['24h'])
   })
   ipcMain.handle(IPC.SETTINGS_GET, (_e, key) => {
-    return (db.prepare('SELECT value FROM settings WHERE key=?').get(key) as any)?.value
+    return (
+      db.prepare('SELECT value FROM settings WHERE key=?').get(key) as { value: string } | undefined
+    )?.value
   })
   ipcMain.handle(IPC.SETTINGS_SET, (_e, key, value) => {
     db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value)

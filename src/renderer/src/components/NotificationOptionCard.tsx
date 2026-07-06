@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, ReactElement } from 'react'
 import type { NotifySetting } from '../../../shared/types'
 
 interface Option {
@@ -71,7 +71,7 @@ interface Props {
   onChange: (value: NotifySetting) => void
 }
 
-export default function NotificationOptionCard({ value, onChange }: Props) {
+export default function NotificationOptionCard({ value, onChange }: Props): ReactElement {
   return (
     <div className="flex flex-col gap-[11px]">
       {OPTIONS.map((opt) => {

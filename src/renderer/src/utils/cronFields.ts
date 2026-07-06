@@ -9,7 +9,7 @@ export interface CronFields {
 const FALLBACK_FIELDS: CronFields = { minute: '*', hour: '*', dom: '*', month: '*', dow: '*' }
 
 function normalizeField(val: string): string {
-  return /[\/\-,]/.test(val) ? '*' : val
+  return /[/\-,]/.test(val) ? '*' : val
 }
 
 export function parseCronToFields(expr: string): CronFields {

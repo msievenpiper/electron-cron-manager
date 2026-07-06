@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import { Interpreter, NotifySetting } from '../../../shared/types'
 import NotificationOptionCard from '../components/NotificationOptionCard'
 
@@ -107,7 +107,7 @@ interface Props {
   onComplete: () => void
 }
 
-export default function OnboardingFlow({ onComplete }: Props) {
+export default function OnboardingFlow({ onComplete }: Props): ReactElement {
   const [step, setStep] = useState(0)
   const [jobName, setJobName] = useState('Daily Backup')
   const [presetId, setPresetId] = useState('daily-midnight')

@@ -2,7 +2,12 @@ import Database from 'better-sqlite3'
 import { v4 as uuidv4 } from 'uuid'
 import { Job, CreateJobInput, UpdateJobInput } from '../../shared/types'
 
-function rowToJob(row: any): Job {
+type JobRow = Omit<Job, 'enabled' | 'source_shell_config'> & {
+  enabled: number
+  source_shell_config: number
+}
+
+function rowToJob(row: JobRow): Job {
   return { ...row, enabled: row.enabled === 1, source_shell_config: row.source_shell_config === 1 }
 }
 
@@ -35,13 +40,13 @@ export class JobRepository {
   }
 
   findAll(): Job[] {
-    return (this.db.prepare('SELECT * FROM jobs ORDER BY created_at ASC').all() as any[]).map(
+    return (this.db.prepare('SELECT * FROM jobs ORDER BY created_at ASC').all() as JobRow[]).map(
       rowToJob
     )
   }
 
   findById(id: string): Job | undefined {
-    const row = this.db.prepare('SELECT * FROM jobs WHERE id = ?').get(id) as any
+    const row = this.db.prepare('SELECT * FROM jobs WHERE id = ?').get(id) as JobRow | undefined
     return row ? rowToJob(row) : undefined
   }
 

@@ -2,10 +2,6 @@ import Database from 'better-sqlite3'
 import { v4 as uuidv4 } from 'uuid'
 import { Run, RunStats, RunStatus } from '../../shared/types'
 
-function rowToRun(row: any): Run {
-  return row as Run
-}
-
 export class RunRepository {
   constructor(private db: Database.Database) {}
 
@@ -39,22 +35,19 @@ export class RunRepository {
   }
 
   findById(id: string): Run | undefined {
-    const row = this.db.prepare('SELECT * FROM runs WHERE id = ?').get(id) as any
-    return row ? rowToRun(row) : undefined
+    return this.db.prepare('SELECT * FROM runs WHERE id = ?').get(id) as Run | undefined
   }
 
   findByJobId(jobId: string, limit = 100): Run[] {
-    return (
-      this.db
-        .prepare('SELECT * FROM runs WHERE job_id = ? ORDER BY started_at DESC LIMIT ?')
-        .all(jobId, limit) as any[]
-    ).map(rowToRun)
+    return this.db
+      .prepare('SELECT * FROM runs WHERE job_id = ? ORDER BY started_at DESC LIMIT ?')
+      .all(jobId, limit) as Run[]
   }
 
   findAll(limit = 500): Run[] {
-    return (
-      this.db.prepare('SELECT * FROM runs ORDER BY started_at DESC LIMIT ?').all(limit) as any[]
-    ).map(rowToRun)
+    return this.db
+      .prepare('SELECT * FROM runs ORDER BY started_at DESC LIMIT ?')
+      .all(limit) as Run[]
   }
 
   prune(jobId: string, maxRuns: number): void {

@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactElement } from 'react'
 import { Job } from '../../../shared/types'
 import CalendarMonthView from '../components/CalendarMonthView'
 import CalendarTimelineView from '../components/CalendarTimelineView'
 
 type CalendarView = 'month' | 'timeline'
 
-export default function CalendarPage() {
+export default function CalendarPage(): ReactElement {
   const [view, setView] = useState<CalendarView>('month')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [jobs, setJobs] = useState<Job[]>([])

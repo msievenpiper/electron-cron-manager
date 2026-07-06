@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type ReactElement } from 'react'
 import { Job, Run } from '../../../shared/types'
 import StatusBadge from '../components/StatusBadge'
 import LogDetailModal from '../components/LogDetailModal'
 import { jobColor } from '../utils/jobColors'
 import { relativeTime, runDuration } from '../utils/format'
 
-export default function HistoryPage() {
+export default function HistoryPage(): ReactElement {
   const [runs, setRuns] = useState<Run[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
   const [logRunId, setLogRunId] = useState<string | null>(null)
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (): Promise<void> => {
     const [runList, jobList] = await Promise.all([
       window.cronManager.runs.list(),
       window.cronManager.jobs.list()
@@ -20,6 +20,8 @@ export default function HistoryPage() {
   }, [])
 
   useEffect(() => {
+    // Initial load on mount, in addition to the live event subscription below.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh()
     const cleanup = window.cronManager.on.jobFinished(() => refresh())
     return cleanup

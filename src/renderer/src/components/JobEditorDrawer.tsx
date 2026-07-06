@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import CronExpressionParser from 'cron-parser'
 import { Job, Interpreter, NotifySetting } from '../../../shared/types'
 import CronBuilder from './CronBuilder'
@@ -23,7 +23,7 @@ interface Props {
   onSave: () => void
 }
 
-export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
+export default function JobEditorDrawer({ job, onClose, onSave }: Props): ReactElement {
   const [name, setName] = useState(job?.name ?? '')
   const [cronExpr, setCronExpr] = useState(job?.cron ?? '0 * * * *')
   const [interpreter, setInterpreter] = useState<Interpreter>(job?.interpreter ?? 'bash')

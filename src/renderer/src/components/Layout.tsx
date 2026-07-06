@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import HomePage from '../pages/HomePage'
 import JobsPage from '../pages/JobsPage'
 import CalendarPage from '../pages/CalendarPage'
@@ -6,7 +6,7 @@ import HistoryPage from '../pages/HistoryPage'
 
 type Tab = 'home' | 'jobs' | 'calendar' | 'history'
 
-export default function Layout() {
+export default function Layout(): ReactElement {
   const [tab, setTab] = useState<Tab>('home')
 
   return (

@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react'
 import { Job, Run } from '../../../shared/types'
 import StatusBadge from './StatusBadge'
 import { relativeTime, runDuration } from '../utils/format'
@@ -8,7 +9,7 @@ interface Props {
   onClose: () => void
 }
 
-export default function LogDetailModal({ run, job, onClose }: Props) {
+export default function LogDetailModal({ run, job, onClose }: Props): ReactElement {
   return (
     <div
       className="fixed inset-0 z-20 flex items-center justify-center bg-black/60"

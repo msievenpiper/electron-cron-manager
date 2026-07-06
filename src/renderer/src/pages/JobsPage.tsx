@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import cronstrue from 'cronstrue'
 import { useJobs } from '../hooks/useJobs'
 import { Job, Run } from '../../../shared/types'
 import JobEditorDrawer from '../components/JobEditorDrawer'
-import StatusBadge, { jobStatusVariant } from '../components/StatusBadge'
+import StatusBadge from '../components/StatusBadge'
+import { jobStatusVariant } from '../utils/badge'
 import { getNextRunDate } from '../utils/schedule'
 import { relativeTime, runDuration } from '../utils/format'
 
@@ -21,7 +22,7 @@ function scheduleLabel(cronExpr: string): string {
   }
 }
 
-export default function JobsPage() {
+export default function JobsPage(): ReactElement {
   const { jobs, runningIds, refresh } = useJobs()
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -34,16 +35,17 @@ export default function JobsPage() {
   )
 
   const selectedJob = jobs.find((j) => j.id === selectedId) ?? null
+  const selectedJobId = selectedJob?.id ?? null
 
   useEffect(() => {
-    if (!selectedJob) return undefined
-    window.cronManager.runs.listByJob(selectedJob.id).then(setDetailRuns)
+    if (!selectedJobId) return undefined
+    window.cronManager.runs.listByJob(selectedJobId).then(setDetailRuns)
     const cleanup = window.cronManager.on.jobFinished((jobId) => {
-      if (jobId === selectedJob.id)
-        window.cronManager.runs.listByJob(selectedJob.id).then(setDetailRuns)
+      if (jobId === selectedJobId)
+        window.cronManager.runs.listByJob(selectedJobId).then(setDetailRuns)
     })
     return cleanup
-  }, [selectedJob?.id])
+  }, [selectedJobId])
 
   const handleRunNow = async (job: Job): Promise<void> => {
     await window.cronManager.jobs.runNow(job.id)

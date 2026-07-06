@@ -1,4 +1,5 @@
-export type BadgeVariant = 'running' | 'success' | 'failure' | 'disabled' | 'scheduled' | 'killed'
+import type { ReactElement } from 'react'
+import type { BadgeVariant } from '../utils/badge'
 
 const VARIANTS: Record<BadgeVariant, { bg: string; text: string; label: string }> = {
   running: { bg: 'bg-running/14', text: 'text-running', label: '↻ Running' },
@@ -15,7 +16,7 @@ interface Props {
   className?: string
 }
 
-export default function StatusBadge({ variant, label, className = '' }: Props) {
+export default function StatusBadge({ variant, label, className = '' }: Props): ReactElement {
   const v = VARIANTS[variant]
   return (
     <span
@@ -24,16 +25,4 @@ export default function StatusBadge({ variant, label, className = '' }: Props) {
       {label ?? v.label}
     </span>
   )
-}
-
-export function runStatusToVariant(
-  status: 'running' | 'success' | 'failure' | 'killed'
-): BadgeVariant {
-  return status
-}
-
-export function jobStatusVariant(job: { enabled: boolean }, isRunning: boolean): BadgeVariant {
-  if (isRunning) return 'running'
-  if (!job.enabled) return 'disabled'
-  return 'scheduled'
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import { Job } from '../../../shared/types'
 import { getRunDatesInMonth } from '../utils/schedule'
 import { jobColor } from '../utils/jobColors'
@@ -8,7 +8,7 @@ interface Props {
   initialDate?: Date
 }
 
-export default function CalendarTimelineView({ jobs, initialDate }: Props) {
+export default function CalendarTimelineView({ jobs, initialDate }: Props): ReactElement {
   const today = new Date()
   const [date, setDate] = useState(
     initialDate
@@ -16,7 +16,7 @@ export default function CalendarTimelineView({ jobs, initialDate }: Props) {
       : new Date(today.getFullYear(), today.getMonth(), today.getDate())
   )
 
-  const goDay = (delta: number) => {
+  const goDay = (delta: number): void => {
     const d = new Date(date)
     d.setDate(d.getDate() + delta)
     setDate(d)

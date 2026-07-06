@@ -22,12 +22,12 @@ contextBridge.exposeInMainWorld('cronManager', {
   },
   on: {
     jobStarted: (cb: (jobId: string) => void) => {
-      const handler = (_e: IpcRendererEvent, jobId: string) => cb(jobId)
+      const handler = (_e: IpcRendererEvent, jobId: string): void => cb(jobId)
       ipcRenderer.on(IPC.JOB_STARTED, handler)
       return () => ipcRenderer.removeListener(IPC.JOB_STARTED, handler)
     },
     jobFinished: (cb: (jobId: string) => void) => {
-      const handler = (_e: IpcRendererEvent, jobId: string) => cb(jobId)
+      const handler = (_e: IpcRendererEvent, jobId: string): void => cb(jobId)
       ipcRenderer.on(IPC.JOB_FINISHED, handler)
       return () => ipcRenderer.removeListener(IPC.JOB_FINISHED, handler)
     }

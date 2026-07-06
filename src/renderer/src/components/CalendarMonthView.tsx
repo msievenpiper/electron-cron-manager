@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactElement } from 'react'
 import { Job } from '../../../shared/types'
 import { getRunDatesInMonth } from '../utils/schedule'
 import { jobColor } from '../utils/jobColors'
@@ -10,7 +10,7 @@ interface Props {
 
 type DayJobEntry = { jobIdx: number }
 
-export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
+export default function CalendarMonthView({ jobs, onDaySelect }: Props): ReactElement {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
@@ -62,8 +62,8 @@ export default function CalendarMonthView({ jobs, onDaySelect }: Props) {
     year: 'numeric'
   })
   const isCurrentMonth = month === today.getMonth() && year === today.getFullYear()
-  const isToday = (day: number) => isCurrentMonth && day === today.getDate()
-  const isPast = (day: number) => isCurrentMonth && day < today.getDate()
+  const isToday = (day: number): boolean => isCurrentMonth && day === today.getDate()
+  const isPast = (day: number): boolean => isCurrentMonth && day < today.getDate()
 
   const enabledJobs = jobs.filter((j) => j.enabled).map((j) => ({ job: j, idx: jobs.indexOf(j) }))
 

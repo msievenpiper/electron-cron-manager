@@ -1,5 +1,5 @@
 // src/renderer/src/components/CronBuilder.tsx
-import { useState } from 'react'
+import { useState, type ChangeEvent, type ReactElement } from 'react'
 import cronstrue from 'cronstrue'
 import CronExpressionParser from 'cron-parser'
 import { parseCronToFields, buildCronFromFields, CronFields } from '../utils/cronFields'
@@ -18,7 +18,7 @@ const PRESETS = [
   { label: 'Custom…', expr: null }
 ]
 
-export const PRESET_PILLS = [
+const PRESET_PILLS = [
   { label: 'Every hour', expr: '0 * * * *' },
   { label: 'Daily midnight', expr: '0 0 * * *' },
   { label: 'Daily 9am', expr: '0 9 * * *' },
@@ -47,7 +47,7 @@ const FIELD_META: FieldMeta[] = [
   { key: 'month', label: 'Month', min: 1, max: 12 }
 ]
 
-export default function CronBuilder({ value, onChange }: Props) {
+export default function CronBuilder({ value, onChange }: Props): ReactElement {
   const [mode, setMode] = useState<'simple' | 'advanced'>('simple')
 
   let cronDescription = ''
@@ -67,16 +67,16 @@ export default function CronBuilder({ value, onChange }: Props) {
   const fields = parseCronToFields(value)
   const currentPresetExpr = PRESETS.some((p) => p.expr === value) ? value : null
 
-  const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handlePresetChange = (e: ChangeEvent<HTMLSelectElement>): void => {
     const selected = e.target.value
     if (selected !== '__custom__') onChange(selected)
   }
 
-  const handleFieldChange = (key: keyof CronFields, val: string) => {
+  const handleFieldChange = (key: keyof CronFields, val: string): void => {
     onChange(buildCronFromFields({ ...fields, [key]: val }))
   }
 
-  const handleAnyToggle = (key: keyof CronFields, checked: boolean) => {
+  const handleAnyToggle = (key: keyof CronFields, checked: boolean): void => {
     const fallback = key === 'dom' || key === 'month' ? '1' : '0'
     handleFieldChange(key, checked ? '*' : fallback)
   }
