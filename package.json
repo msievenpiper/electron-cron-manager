@@ -24,20 +24,23 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "better-sqlite3": "^12.6.2",
+    "better-sqlite3": "^12.11.1",
     "cron-parser": "^5.5.0",
     "cronstrue": "^3.12.0",
     "node-cron": "^4.2.1",
     "uuid": "^13.0.0"
   },
+  "overrides": {
+    "node-abi": "^4.33.0"
+  },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
-    "@electron/rebuild": "^4.0.3",
+    "@electron/rebuild": "^4.1.0",
     "@tailwindcss/vite": "^4.1.18",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^22.19.1",
+    "@types/node": "^26.1.0",
     "@types/node-cron": "^3.0.11",
     "@types/react": "^19.2.7",
     "@types/react-big-calendar": "^1.16.3",
@@ -46,7 +49,7 @@
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/coverage-v8": "^4.0.18",
     "autoprefixer": "^10.4.24",
-    "electron": "^39.2.6",
+    "electron": "^43.0.0",
     "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",
     "eslint": "^9.39.1",
@@ -58,7 +61,7 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vite": "^7.2.6",
     "vitest": "^4.0.18"
   }
