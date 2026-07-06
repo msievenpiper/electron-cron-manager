@@ -14,7 +14,12 @@ describe('RunRepository', () => {
     db = createDatabase(':memory:')
     jobs = new JobRepository(db)
     runs = new RunRepository(db)
-    jobId = jobs.create({ name: 'Test', cron: '* * * * *', interpreter: 'bash', command: 'echo hi' }).id
+    jobId = jobs.create({
+      name: 'Test',
+      cron: '* * * * *',
+      interpreter: 'bash',
+      command: 'echo hi'
+    }).id
   })
 
   afterEach(() => db.close())
@@ -27,7 +32,12 @@ describe('RunRepository', () => {
 
   it('finishes a run with exit code', () => {
     const run = runs.start(jobId)
-    const finished = runs.finish(run.id, { exit_code: 0, stdout: 'hello', stderr: '', status: 'success' })
+    const finished = runs.finish(run.id, {
+      exit_code: 0,
+      stdout: 'hello',
+      stderr: '',
+      status: 'success'
+    })
     expect(finished?.status).toBe('success')
     expect(finished?.stdout).toBe('hello')
     expect(finished?.ended_at).toBeGreaterThan(0)
@@ -52,15 +62,18 @@ describe('RunRepository', () => {
       const now = Date.now()
       const windowMs = 24 * 60 * 60 * 1000
 
-      db.prepare(`INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-        .run('r1', jobId, now - 1000, now, 0, '', '', 'success')
-      db.prepare(`INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-        .run('r2', jobId, now - 2000, now, 1, '', '', 'failure')
-      db.prepare(`INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-        .run('r3', jobId, now - windowMs - 1000, now, 0, '', '', 'success') // outside window
+      db.prepare(
+        `INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run('r1', jobId, now - 1000, now, 0, '', '', 'success')
+      db.prepare(
+        `INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run('r2', jobId, now - 2000, now, 1, '', '', 'failure')
+      db.prepare(
+        `INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run('r3', jobId, now - windowMs - 1000, now, 0, '', '', 'success') // outside window
 
       const stats = runs.getStats(windowMs)
       expect(stats.success).toBe(1)
@@ -73,9 +86,10 @@ describe('RunRepository', () => {
       const windowMs = 24 * 60 * 60 * 1000
 
       // Started 2 days ago — outside the 24h window — but still running
-      db.prepare(`INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-        .run('r1', jobId, now - 2 * windowMs, null, null, null, null, 'running')
+      db.prepare(
+        `INSERT INTO runs (id, job_id, started_at, ended_at, exit_code, stdout, stderr, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run('r1', jobId, now - 2 * windowMs, null, null, null, null, 'running')
 
       const stats = runs.getStats(windowMs)
       expect(stats.running).toBe(1)

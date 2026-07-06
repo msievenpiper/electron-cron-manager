@@ -44,13 +44,19 @@ export function registerIpcHandlers(
         runRepo.finish(runId, result)
         runRepo.prune(jobId, maxRunsPerJob())
         const job = jobRepo.findById(jobId)
-        if (job && (job.notify === 'all' || (job.notify === 'failure' && result.status === 'failure'))) {
-          new Notification({ title: job.name, body: `${result.status} (exit ${result.exit_code})` }).show()
+        if (
+          job &&
+          (job.notify === 'all' || (job.notify === 'failure' && result.status === 'failure'))
+        ) {
+          new Notification({
+            title: job.name,
+            body: `${result.status} (exit ${result.exit_code})`
+          }).show()
         }
       }
       getWindow()?.webContents.send(IPC.JOB_FINISHED, jobId)
       onStatusChange?.()
-    },
+    }
   }
 
   // Wire scheduler callbacks via public setCallbacks method
@@ -84,8 +90,8 @@ export function registerIpcHandlers(
   ipcMain.handle(IPC.RUNS_STATS, (_e, window: '24h' | '7d' | '30d') => {
     const ms: Record<string, number> = {
       '24h': 24 * 60 * 60 * 1000,
-      '7d':  7 * 24 * 60 * 60 * 1000,
-      '30d': 30 * 24 * 60 * 60 * 1000,
+      '7d': 7 * 24 * 60 * 60 * 1000,
+      '30d': 30 * 24 * 60 * 60 * 1000
     }
     return runRepo.getStats(ms[window] ?? ms['24h'])
   })

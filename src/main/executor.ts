@@ -22,7 +22,9 @@ export async function resolveJobEnv(sourceShellConfig: boolean): Promise<NodeJS.
     const proc = spawn(shell, ['-l', '-c', 'env'], { env: process.env })
     let output = ''
 
-    proc.stdout.on('data', (d: Buffer) => { output += d.toString() })
+    proc.stdout.on('data', (d: Buffer) => {
+      output += d.toString()
+    })
     proc.on('close', () => {
       const env: NodeJS.ProcessEnv = {}
       for (const line of output.split('\n')) {
@@ -37,22 +39,35 @@ export async function resolveJobEnv(sourceShellConfig: boolean): Promise<NodeJS.
   })
 }
 
-export function executeJobWithHandle(opts: { interpreter: string; command: string; env?: NodeJS.ProcessEnv }): ExecuteHandle {
+export function executeJobWithHandle(opts: {
+  interpreter: string
+  command: string
+  env?: NodeJS.ProcessEnv
+}): ExecuteHandle {
   let killed = false
   const proc = spawn(opts.interpreter, ['-c', opts.command], { env: opts.env ?? process.env })
 
   let stdout = ''
   let stderr = ''
 
-  proc.stdout.on('data', (d: Buffer) => { stdout += d.toString() })
-  proc.stderr.on('data', (d: Buffer) => { stderr += d.toString() })
+  proc.stdout.on('data', (d: Buffer) => {
+    stdout += d.toString()
+  })
+  proc.stderr.on('data', (d: Buffer) => {
+    stderr += d.toString()
+  })
 
   const promise = new Promise<ExecuteResult>((resolve) => {
     proc.on('close', (code) => {
       if (killed) {
         resolve({ stdout, stderr, exit_code: code ?? -1, status: 'killed' })
       } else {
-        resolve({ stdout, stderr, exit_code: code ?? -1, status: code === 0 ? 'success' : 'failure' })
+        resolve({
+          stdout,
+          stderr,
+          exit_code: code ?? -1,
+          status: code === 0 ? 'success' : 'failure'
+        })
       }
     })
   })
@@ -62,10 +77,14 @@ export function executeJobWithHandle(opts: { interpreter: string; command: strin
     kill: () => {
       killed = true
       proc.kill('SIGTERM')
-    },
+    }
   }
 }
 
-export async function executeJob(opts: { interpreter: string; command: string; env?: NodeJS.ProcessEnv }): Promise<ExecuteResult> {
+export async function executeJob(opts: {
+  interpreter: string
+  command: string
+  env?: NodeJS.ProcessEnv
+}): Promise<ExecuteResult> {
   return executeJobWithHandle(opts).promise
 }

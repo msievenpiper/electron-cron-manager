@@ -30,8 +30,8 @@ export const SCHEMA = `
 
   CREATE INDEX IF NOT EXISTS idx_runs_job_id ON runs(job_id);
   CREATE INDEX IF NOT EXISTS idx_runs_started_at ON runs(started_at);
-`;
+`
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
-  max_runs_per_job: '100',
-};
+  max_runs_per_job: '100'
+}

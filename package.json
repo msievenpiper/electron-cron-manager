@@ -24,6 +24,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@fontsource/inter": "^5.2.8",
     "better-sqlite3": "^12.11.1",
     "cron-parser": "^5.5.0",
     "cronstrue": "^3.12.0",

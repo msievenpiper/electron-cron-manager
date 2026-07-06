@@ -12,17 +12,32 @@ export class JobRepository {
   create(input: CreateJobInput): Job {
     const now = Date.now()
     const id = uuidv4()
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO jobs (id, name, cron, interpreter, command, enabled, notify, source_shell_config, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, input.name, input.cron, input.interpreter, input.command,
-           input.enabled !== false ? 1 : 0, input.notify ?? 'failure',
-           input.source_shell_config !== false ? 1 : 0, now, now)
+    `
+      )
+      .run(
+        id,
+        input.name,
+        input.cron,
+        input.interpreter,
+        input.command,
+        input.enabled !== false ? 1 : 0,
+        input.notify ?? 'failure',
+        input.source_shell_config !== false ? 1 : 0,
+        now,
+        now
+      )
     return this.findById(id)!
   }
 
   findAll(): Job[] {
-    return (this.db.prepare('SELECT * FROM jobs ORDER BY created_at ASC').all() as any[]).map(rowToJob)
+    return (this.db.prepare('SELECT * FROM jobs ORDER BY created_at ASC').all() as any[]).map(
+      rowToJob
+    )
   }
 
   findById(id: string): Job | undefined {
@@ -35,10 +50,23 @@ export class JobRepository {
     if (!existing) return undefined
     const now = Date.now()
     const merged = { ...existing, ...input, updated_at: now }
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       UPDATE jobs SET name=?, cron=?, interpreter=?, command=?, enabled=?, notify=?, source_shell_config=?, updated_at=? WHERE id=?
-    `).run(merged.name, merged.cron, merged.interpreter, merged.command,
-           merged.enabled ? 1 : 0, merged.notify, merged.source_shell_config ? 1 : 0, now, id)
+    `
+      )
+      .run(
+        merged.name,
+        merged.cron,
+        merged.interpreter,
+        merged.command,
+        merged.enabled ? 1 : 0,
+        merged.notify,
+        merged.source_shell_config ? 1 : 0,
+        now,
+        id
+      )
     return this.findById(id)
   }
 

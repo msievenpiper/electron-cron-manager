@@ -14,22 +14,25 @@ export default function CalendarPage() {
     window.cronManager.jobs.list().then(setJobs)
   }, [])
 
-  const handleDaySelect = (date: Date) => {
+  const handleDaySelect = (date: Date): void => {
     setSelectedDate(date)
     setView('timeline')
   }
 
   return (
-    <div className="p-4 flex-1 min-h-0 flex flex-col">
-      <div className="flex justify-between items-center mb-4 shrink-0">
-        <h2 className="text-lg font-semibold">Calendar</h2>
-        <div className="flex gap-1 bg-gray-800 rounded p-1">
-          {(['month', 'timeline'] as CalendarView[]).map(v => (
+    <div className="flex-1 min-h-0 flex flex-col px-6 py-5">
+      <div className="mb-4 flex shrink-0 items-center justify-between">
+        <h2 className="text-lg font-bold text-heading">Calendar</h2>
+        <div className="flex rounded-lg border border-white/7 bg-white/5 p-[3px]">
+          {(['month', 'timeline'] as CalendarView[]).map((v) => (
             <button
               key={v}
-              onClick={() => { setView(v); setSelectedDate(null) }}
-              className={`px-3 py-1 text-xs rounded capitalize transition-colors ${
-                view === v ? 'bg-gray-600 text-white' : 'text-gray-400 hover:text-white'
+              onClick={() => {
+                setView(v)
+                setSelectedDate(null)
+              }}
+              className={`rounded-md px-3 py-1 text-xs capitalize transition-colors ${
+                view === v ? 'bg-white/10 font-medium text-body' : 'text-muted/45 hover:text-body'
               }`}
             >
               {v}
@@ -38,15 +41,16 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-auto">
-        {view === 'month'
-          ? <CalendarMonthView jobs={jobs} onDaySelect={handleDaySelect} />
-          : <CalendarTimelineView
-              key={selectedDate?.toISOString() ?? 'default'}
-              jobs={jobs}
-              initialDate={selectedDate ?? undefined}
-            />
-        }
+      <div className="min-h-0 flex-1 overflow-auto">
+        {view === 'month' ? (
+          <CalendarMonthView jobs={jobs} onDaySelect={handleDaySelect} />
+        ) : (
+          <CalendarTimelineView
+            key={selectedDate?.toISOString() ?? 'default'}
+            jobs={jobs}
+            initialDate={selectedDate ?? undefined}
+          />
+        )}
       </div>
     </div>
   )

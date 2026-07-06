@@ -72,7 +72,9 @@ export class SchedulerEngine {
     const maxes = [59, 59, 23, 31, 12, 6]
     const offset = isSixField ? 0 : 1
     return fields
-      .map((field, i) => field.replace(/^(\d+)\/(\d+)$/, (_, n, m) => `${n}-${maxes[i + offset]}/${m}`))
+      .map((field, i) =>
+        field.replace(/^(\d+)\/(\d+)$/, (_, n, m) => `${n}-${maxes[i + offset]}/${m}`)
+      )
       .join(' ')
   }
 
@@ -90,7 +92,11 @@ export class SchedulerEngine {
 
     const env = await resolveJobEnv(job.source_shell_config)
     const runId = `${job.id}-${Date.now()}`
-    const { promise, kill } = executeJobWithHandle({ interpreter: job.interpreter, command: job.command, env })
+    const { promise, kill } = executeJobWithHandle({
+      interpreter: job.interpreter,
+      command: job.command,
+      env
+    })
     this.activeRuns.set(job.id, { runId, kill })
     this.callbacks.onJobStart(job.id, runId)
 

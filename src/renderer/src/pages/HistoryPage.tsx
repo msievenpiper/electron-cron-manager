@@ -1,25 +1,22 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Run } from '../../../shared/types'
-
-const STATUS_COLORS: Record<Run['status'], string> = {
-  success: 'text-green-400',
-  failure: 'text-red-400',
-  killed: 'text-yellow-400',
-  running: 'text-blue-400',
-}
-
-function duration(run: Run): string {
-  if (!run.ended_at) return '…'
-  return `${((run.ended_at - run.started_at) / 1000).toFixed(1)}s`
-}
+import { Job, Run } from '../../../shared/types'
+import StatusBadge from '../components/StatusBadge'
+import LogDetailModal from '../components/LogDetailModal'
+import { jobColor } from '../utils/jobColors'
+import { relativeTime, runDuration } from '../utils/format'
 
 export default function HistoryPage() {
   const [runs, setRuns] = useState<Run[]>([])
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [logRunId, setLogRunId] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
-    const list = await window.cronManager.runs.list()
-    setRuns(list)
+    const [runList, jobList] = await Promise.all([
+      window.cronManager.runs.list(),
+      window.cronManager.jobs.list()
+    ])
+    setRuns(runList)
+    setJobs(jobList)
   }, [])
 
   useEffect(() => {
@@ -28,56 +25,74 @@ export default function HistoryPage() {
     return cleanup
   }, [refresh])
 
+  const jobMap = new Map(jobs.map((j) => [j.id, j]))
+  const jobIndex = new Map(jobs.map((j, i) => [j.id, i]))
+  const logRun = runs.find((r) => r.id === logRunId) ?? null
+
   return (
-    <div className="p-4 flex-1 min-h-0 overflow-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">History</h2>
-        <button onClick={refresh} className="text-xs text-gray-400 hover:text-white">Refresh</button>
+    <div className="flex-1 min-h-0 overflow-auto px-[26px] py-[22px]">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-bold text-heading">History</h2>
+        <button
+          onClick={refresh}
+          className="rounded-[7px] border border-white/8 px-3 py-[6px] text-xs text-muted/45 hover:text-muted/70"
+        >
+          ↺ Refresh
+        </button>
       </div>
 
       {runs.length === 0 ? (
-        <p className="text-gray-500 text-sm">No runs yet. Trigger a job to see history.</p>
+        <p className="text-sm text-muted/40">No runs yet. Trigger a job to see history.</p>
       ) : (
-        <div className="space-y-1">
-          {runs.map(run => (
-            <div key={run.id} className="border border-gray-800 rounded overflow-hidden">
-              <button
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-900/50 text-left"
-                onClick={() => setExpandedId(expandedId === run.id ? null : run.id)}
+        <div className="overflow-hidden rounded-2xl border border-white/7 bg-white/2">
+          <div className="grid grid-cols-[120px_1fr_90px_80px_60px] border-b border-white/7 px-4 py-[9px]">
+            {['Status', 'Job', 'Time', 'Duration', ''].map((h) => (
+              <span
+                key={h}
+                className="text-[10.5px] font-semibold uppercase tracking-[0.5px] text-muted/32"
               >
-                <span className={`font-medium w-16 ${STATUS_COLORS[run.status]}`}>{run.status}</span>
-                <span className="text-gray-300 truncate flex-1">{run.job_id}</span>
-                <span className="text-gray-500 text-xs shrink-0">
-                  {new Date(run.started_at).toLocaleString()}
+                {h}
+              </span>
+            ))}
+          </div>
+          {runs.map((run) => {
+            const job = jobMap.get(run.job_id)
+            const idx = jobIndex.get(run.job_id) ?? 0
+            return (
+              <div
+                key={run.id}
+                className="grid grid-cols-[120px_1fr_90px_80px_60px] items-center border-b border-white/4 px-4 py-[11px] last:border-0 hover:bg-white/2"
+              >
+                <StatusBadge variant={run.status} />
+                <span className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: jobColor(idx) }}
+                  />
+                  <span className="truncate text-[13px] font-medium text-body">
+                    {job?.name ?? run.job_id}
+                  </span>
                 </span>
-                <span className="text-gray-500 text-xs shrink-0 w-12 text-right">
-                  {duration(run)}
-                </span>
-                <span className="text-gray-600 text-xs">{expandedId === run.id ? '▲' : '▼'}</span>
-              </button>
-
-              {expandedId === run.id && (
-                <div className="border-t border-gray-800 bg-gray-950 p-3 space-y-2">
-                  {run.stdout ? (
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1 uppercase tracking-wide">stdout</div>
-                      <pre className="text-xs text-green-300 whitespace-pre-wrap font-mono max-h-48 overflow-auto">{run.stdout}</pre>
-                    </div>
-                  ) : null}
-                  {run.stderr ? (
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1 uppercase tracking-wide">stderr</div>
-                      <pre className="text-xs text-red-300 whitespace-pre-wrap font-mono max-h-48 overflow-auto">{run.stderr}</pre>
-                    </div>
-                  ) : null}
-                  {!run.stdout && !run.stderr && (
-                    <span className="text-xs text-gray-500">No output</span>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                <span className="text-xs text-muted/42">{relativeTime(run.started_at)}</span>
+                <span className="font-mono text-[11.5px] text-muted/30">{runDuration(run)}</span>
+                <button
+                  onClick={() => setLogRunId(run.id)}
+                  className="justify-self-start rounded-[5px] border border-white/6 px-2 py-1 text-[11px] text-muted/30 hover:text-muted/60"
+                >
+                  Logs
+                </button>
+              </div>
+            )
+          })}
         </div>
+      )}
+
+      {logRun && (
+        <LogDetailModal
+          run={logRun}
+          job={jobMap.get(logRun.job_id)}
+          onClose={() => setLogRunId(null)}
+        />
       )}
     </div>
   )

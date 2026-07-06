@@ -12,7 +12,7 @@ export function createDatabase(path: string): Database.Database {
 
   // Migration: add source_shell_config for existing databases
   try {
-    db.exec("ALTER TABLE jobs ADD COLUMN source_shell_config INTEGER DEFAULT 1")
+    db.exec('ALTER TABLE jobs ADD COLUMN source_shell_config INTEGER DEFAULT 1')
   } catch {
     // Column already exists — safe to ignore
   }

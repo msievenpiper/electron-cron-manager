@@ -13,11 +13,11 @@ export function useJobs() {
   useEffect(() => {
     refresh()
     const cleanupStarted = window.cronManager.on.jobStarted((jobId) => {
-      setRunningIds(prev => new Set([...prev, jobId]))
+      setRunningIds((prev) => new Set([...prev, jobId]))
       refresh()
     })
     const cleanupFinished = window.cronManager.on.jobFinished((jobId) => {
-      setRunningIds(prev => {
+      setRunningIds((prev) => {
         const s = new Set(prev)
         s.delete(jobId)
         return s
