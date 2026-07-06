@@ -4,11 +4,12 @@ import { JobRepository } from './db/jobs'
 import { RunRepository } from './db/runs'
 import { SchedulerEngine } from './scheduler'
 import { ExecuteResult } from './executor'
+import { CreateJobInput, UpdateJobInput } from '../shared/types'
 import Database from 'better-sqlite3'
 
 const ALLOWED_INTERPRETERS = ['bash', 'sh', 'zsh', 'node', 'python3', 'ruby'] as const
 
-function validateJobInput(input: any): void {
+function validateJobInput(input: CreateJobInput | UpdateJobInput): void {
   if (input.interpreter && !ALLOWED_INTERPRETERS.includes(input.interpreter)) {
     throw new Error(`Invalid interpreter: ${input.interpreter}`)
   }
@@ -24,33 +25,40 @@ export function registerIpcHandlers(
   const runRepo = new RunRepository(db)
 
   const maxRunsPerJob = (): number => {
-    const row = db.prepare("SELECT value FROM settings WHERE key='max_runs_per_job'").get() as any
+    const row = db.prepare("SELECT value FROM settings WHERE key='max_runs_per_job'").get() as
+      { value: string } | undefined
     return parseInt(row?.value ?? '100', 10)
   }
 
   const activeRunIds = new Map<string, string>() // jobId → DB run id
 
   const origCallbacks = {
-    onJobStart: (jobId: string, _runId: string) => {
+    onJobStart: (jobId: string, _runId: string): void => {
       const run = runRepo.start(jobId)
       activeRunIds.set(jobId, run.id)
       getWindow()?.webContents.send(IPC.JOB_STARTED, jobId)
       onStatusChange?.()
     },
-    onJobFinish: (jobId: string, _runId: string, result: ExecuteResult) => {
+    onJobFinish: (jobId: string, _runId: string, result: ExecuteResult): void => {
       const runId = activeRunIds.get(jobId)
       activeRunIds.delete(jobId)
       if (runId) {
         runRepo.finish(runId, result)
         runRepo.prune(jobId, maxRunsPerJob())
         const job = jobRepo.findById(jobId)
-        if (job && (job.notify === 'all' || (job.notify === 'failure' && result.status === 'failure'))) {
-          new Notification({ title: job.name, body: `${result.status} (exit ${result.exit_code})` }).show()
+        if (
+          job &&
+          (job.notify === 'all' || (job.notify === 'failure' && result.status === 'failure'))
+        ) {
+          new Notification({
+            title: job.name,
+            body: `${result.status} (exit ${result.exit_code})`
+          }).show()
         }
       }
       getWindow()?.webContents.send(IPC.JOB_FINISHED, jobId)
       onStatusChange?.()
-    },
+    }
   }
 
   // Wire scheduler callbacks via public setCallbacks method
@@ -84,13 +92,15 @@ export function registerIpcHandlers(
   ipcMain.handle(IPC.RUNS_STATS, (_e, window: '24h' | '7d' | '30d') => {
     const ms: Record<string, number> = {
       '24h': 24 * 60 * 60 * 1000,
-      '7d':  7 * 24 * 60 * 60 * 1000,
-      '30d': 30 * 24 * 60 * 60 * 1000,
+      '7d': 7 * 24 * 60 * 60 * 1000,
+      '30d': 30 * 24 * 60 * 60 * 1000
     }
     return runRepo.getStats(ms[window] ?? ms['24h'])
   })
   ipcMain.handle(IPC.SETTINGS_GET, (_e, key) => {
-    return (db.prepare('SELECT value FROM settings WHERE key=?').get(key) as any)?.value
+    return (
+      db.prepare('SELECT value FROM settings WHERE key=?').get(key) as { value: string } | undefined
+    )?.value
   })
   ipcMain.handle(IPC.SETTINGS_SET, (_e, key, value) => {
     db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value)

@@ -4,7 +4,11 @@ import { parseCronToFields, buildCronFromFields } from './cronFields'
 describe('parseCronToFields', () => {
   it('parses a standard 5-part expression', () => {
     expect(parseCronToFields('0 9 * * 1')).toEqual({
-      minute: '0', hour: '9', dom: '*', month: '*', dow: '1',
+      minute: '0',
+      hour: '9',
+      dom: '*',
+      month: '*',
+      dow: '1'
     })
   })
 
@@ -22,20 +26,26 @@ describe('parseCronToFields', () => {
 
   it('returns all * for invalid expression', () => {
     expect(parseCronToFields('not valid')).toEqual({
-      minute: '*', hour: '*', dom: '*', month: '*', dow: '*',
+      minute: '*',
+      hour: '*',
+      dom: '*',
+      month: '*',
+      dow: '*'
     })
   })
 })
 
 describe('buildCronFromFields', () => {
   it('joins 5 fields with spaces', () => {
-    expect(buildCronFromFields({ minute: '0', hour: '9', dom: '*', month: '*', dow: '1' }))
-      .toBe('0 9 * * 1')
+    expect(buildCronFromFields({ minute: '0', hour: '9', dom: '*', month: '*', dow: '1' })).toBe(
+      '0 9 * * 1'
+    )
   })
 
   it('handles all wildcards', () => {
-    expect(buildCronFromFields({ minute: '*', hour: '*', dom: '*', month: '*', dow: '*' }))
-      .toBe('* * * * *')
+    expect(buildCronFromFields({ minute: '*', hour: '*', dom: '*', month: '*', dow: '*' })).toBe(
+      '* * * * *'
+    )
   })
 
   it('round-trips parseCronToFields output for a standard expression', () => {

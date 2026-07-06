@@ -1,9 +1,21 @@
-import { useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import CronExpressionParser from 'cron-parser'
 import { Job, Interpreter, NotifySetting } from '../../../shared/types'
 import CronBuilder from './CronBuilder'
+import NotificationOptionCard from './NotificationOptionCard'
 
-const INTERPRETERS: Interpreter[] = ['bash', 'sh', 'zsh', 'node', 'python3', 'ruby']
+const INTERPRETERS: { value: Interpreter; label: string }[] = [
+  { value: 'bash', label: 'bash — Bourne Again Shell' },
+  { value: 'sh', label: 'sh — POSIX Shell' },
+  { value: 'zsh', label: 'zsh — Z Shell' },
+  { value: 'node', label: 'node — Node.js' },
+  { value: 'python3', label: 'python3 — Python 3' },
+  { value: 'ruby', label: 'ruby — Ruby' }
+]
+
+const fieldLabel = 'text-[10.5px] font-semibold uppercase tracking-[0.7px] text-muted/42'
+const fieldInput =
+  'rounded-[10px] border border-white/10 bg-black/35 px-[13px] py-[10px] text-sm text-body outline-none placeholder:text-muted/30 focus:border-accent/50'
 
 interface Props {
   job: Job | null
@@ -11,7 +23,7 @@ interface Props {
   onSave: () => void
 }
 
-export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
+export default function JobEditorDrawer({ job, onClose, onSave }: Props): ReactElement {
   const [name, setName] = useState(job?.name ?? '')
   const [cronExpr, setCronExpr] = useState(job?.cron ?? '0 * * * *')
   const [interpreter, setInterpreter] = useState<Interpreter>(job?.interpreter ?? 'bash')
@@ -22,20 +34,36 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
   const [saving, setSaving] = useState(false)
 
   let cronValid = true
-  try { CronExpressionParser.parse(cronExpr) } catch { cronValid = false }
-
-  const handleRunNow = async () => {
-    if (job) await window.cronManager.jobs.runNow(job.id)
+  try {
+    CronExpressionParser.parse(cronExpr)
+  } catch {
+    cronValid = false
   }
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<void> => {
     if (!name.trim() || !command.trim()) return
     setSaving(true)
     try {
       if (job) {
-        await window.cronManager.jobs.update(job.id, { name, cron: cronExpr, interpreter, command, notify, enabled, source_shell_config: sourceShellConfig })
+        await window.cronManager.jobs.update(job.id, {
+          name,
+          cron: cronExpr,
+          interpreter,
+          command,
+          notify,
+          enabled,
+          source_shell_config: sourceShellConfig
+        })
       } else {
-        await window.cronManager.jobs.create({ name, cron: cronExpr, interpreter, command, notify, enabled, source_shell_config: sourceShellConfig })
+        await window.cronManager.jobs.create({
+          name,
+          cron: cronExpr,
+          interpreter,
+          command,
+          notify,
+          enabled,
+          source_shell_config: sourceShellConfig
+        })
       }
       onSave()
       onClose()
@@ -45,101 +73,117 @@ export default function JobEditorDrawer({ job, onClose, onSave }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-end z-10" onClick={onClose}>
+    <div className="fixed inset-0 z-10 flex" onClick={onClose}>
+      <div className="flex-1 bg-black/55" />
       <div
-        className="w-96 bg-gray-900 h-full overflow-auto p-6 flex flex-col gap-4"
-        onClick={e => e.stopPropagation()}
+        className="flex h-full w-[420px] flex-col border-l border-white/9 bg-panel"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center">
-          <h3 className="font-semibold">{job ? 'Edit Job' : 'New Job'}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-lg leading-none">×</button>
+        <div className="flex items-center justify-between border-b border-white/7 px-[22px] pb-[15px] pt-[18px]">
+          <h3 className="text-base font-bold tracking-[-0.3px] text-heading">
+            {job ? 'Edit Job' : 'New Job'}
+          </h3>
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-white/6 text-base leading-none text-muted/55 hover:text-body"
+          >
+            ×
+          </button>
         </div>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-gray-300">Name</span>
-          <input
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="My job"
-            className="bg-gray-800 rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-          />
-        </label>
+        <div className="flex flex-1 flex-col gap-[18px] overflow-auto px-[22px] py-[18px]">
+          <label className="flex flex-col gap-1.5">
+            <span className={fieldLabel}>Job Name</span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="My job"
+              className={fieldInput}
+            />
+          </label>
 
-        <CronBuilder value={cronExpr} onChange={setCronExpr} />
+          <div className="flex flex-col gap-1.5">
+            <span className={fieldLabel}>Schedule</span>
+            <CronBuilder value={cronExpr} onChange={setCronExpr} />
+          </div>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-gray-300">Interpreter</span>
-          <select
-            value={interpreter}
-            onChange={e => setInterpreter(e.target.value as Interpreter)}
-            className="bg-gray-800 rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            {INTERPRETERS.map(i => <option key={i} value={i}>{i}</option>)}
-          </select>
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-gray-300">Command</span>
-          <textarea
-            value={command}
-            onChange={e => setCommand(e.target.value)}
-            rows={4}
-            placeholder="echo 'hello world'"
-            className="bg-gray-800 rounded px-3 py-2 text-sm font-mono outline-none focus:ring-1 focus:ring-blue-500 resize-none"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-gray-300">Notifications</span>
-          <select
-            value={notify}
-            onChange={e => setNotify(e.target.value as NotifySetting)}
-            className="bg-gray-800 rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="all">All completions</option>
-            <option value="failure">Failures only</option>
-            <option value="none">None</option>
-          </select>
-        </label>
-
-        <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={e => setEnabled(e.target.checked)}
-            className="w-4 h-4"
-          />
-          Enabled
-        </label>
-
-        <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={sourceShellConfig}
-            onChange={e => setSourceShellConfig(e.target.checked)}
-            className="w-4 h-4"
-          />
-          <span>
-            Source shell config
-            <span className="text-gray-500 ml-1 text-xs">(~/.zshrc, ~/.bash_profile)</span>
-          </span>
-        </label>
-
-        <div className="flex gap-2 mt-auto pt-4 border-t border-gray-800">
-          {job && (
-            <button
-              onClick={handleRunNow}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+          <label className="flex flex-col gap-1.5">
+            <span className={fieldLabel}>Interpreter</span>
+            <select
+              value={interpreter}
+              onChange={(e) => setInterpreter(e.target.value as Interpreter)}
+              className={fieldInput}
             >
-              Run Now
-            </button>
-          )}
+              {INTERPRETERS.map((i) => (
+                <option key={i.value} value={i.value}>
+                  {i.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className={fieldLabel}>Command</span>
+            <textarea
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+              rows={4}
+              placeholder="echo 'hello world'"
+              className={`${fieldInput} resize-none font-mono text-[12.5px] leading-[1.65]`}
+            />
+          </label>
+
+          <div className="flex flex-col gap-1.5">
+            <span className={fieldLabel}>Notifications</span>
+            <NotificationOptionCard value={notify} onChange={setNotify} />
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <span className={fieldLabel}>Options</span>
+            <label className="flex items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={enabled}
+                onChange={(e) => setEnabled(e.target.checked)}
+                className="mt-0.5 h-[15px] w-[15px] accent-accent"
+              />
+              <span>
+                <span className="block text-[13px] font-medium text-body">Enabled</span>
+                <span className="block text-[11px] text-muted/38">
+                  Job runs on its schedule when enabled
+                </span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={sourceShellConfig}
+                onChange={(e) => setSourceShellConfig(e.target.checked)}
+                className="mt-0.5 h-[15px] w-[15px] accent-accent"
+              />
+              <span>
+                <span className="block text-[13px] font-medium text-body">Source shell config</span>
+                <span className="block text-[11px] text-muted/38">
+                  Loads ~/.zshrc or ~/.bash_profile first
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-[9px] border-t border-white/7 px-[22px] py-[14px]">
+          <button
+            onClick={onClose}
+            className="rounded-[9px] border border-white/9 bg-white/[0.055] px-4 py-2 text-sm text-muted/65 hover:bg-white/9"
+          >
+            Cancel
+          </button>
           <button
             onClick={handleSave}
             disabled={saving || !name.trim() || !command.trim() || !cronValid}
-            className="ml-auto px-4 py-1.5 bg-blue-600 hover:bg-blue-500 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-[9px] bg-accent-fill px-5 py-2 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(37,99,235,0.35)] hover:bg-accent-fill-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? 'Saving…' : 'Save'}
+            {saving ? 'Saving…' : 'Save Job'}
           </button>
         </div>
       </div>

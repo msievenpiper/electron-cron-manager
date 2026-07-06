@@ -9,27 +9,27 @@ contextBridge.exposeInMainWorld('cronManager', {
     update: (id: string, input: unknown) => ipcRenderer.invoke(IPC.JOBS_UPDATE, id, input),
     delete: (id: string) => ipcRenderer.invoke(IPC.JOBS_DELETE, id),
     runNow: (id: string) => ipcRenderer.invoke(IPC.JOBS_RUN_NOW, id),
-    kill: (id: string) => ipcRenderer.invoke(IPC.JOBS_KILL, id),
+    kill: (id: string) => ipcRenderer.invoke(IPC.JOBS_KILL, id)
   },
   runs: {
     list: () => ipcRenderer.invoke(IPC.RUNS_LIST),
     listByJob: (jobId: string) => ipcRenderer.invoke(IPC.RUNS_LIST_BY_JOB, jobId),
-    stats: (window: '24h' | '7d' | '30d') => ipcRenderer.invoke(IPC.RUNS_STATS, window),
+    stats: (window: '24h' | '7d' | '30d') => ipcRenderer.invoke(IPC.RUNS_STATS, window)
   },
   settings: {
     get: (key: string) => ipcRenderer.invoke(IPC.SETTINGS_GET, key),
-    set: (key: string, value: string) => ipcRenderer.invoke(IPC.SETTINGS_SET, key, value),
+    set: (key: string, value: string) => ipcRenderer.invoke(IPC.SETTINGS_SET, key, value)
   },
   on: {
     jobStarted: (cb: (jobId: string) => void) => {
-      const handler = (_e: IpcRendererEvent, jobId: string) => cb(jobId)
+      const handler = (_e: IpcRendererEvent, jobId: string): void => cb(jobId)
       ipcRenderer.on(IPC.JOB_STARTED, handler)
       return () => ipcRenderer.removeListener(IPC.JOB_STARTED, handler)
     },
     jobFinished: (cb: (jobId: string) => void) => {
-      const handler = (_e: IpcRendererEvent, jobId: string) => cb(jobId)
+      const handler = (_e: IpcRendererEvent, jobId: string): void => cb(jobId)
       ipcRenderer.on(IPC.JOB_FINISHED, handler)
       return () => ipcRenderer.removeListener(IPC.JOB_FINISHED, handler)
-    },
-  },
+    }
+  }
 })

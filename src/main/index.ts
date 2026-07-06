@@ -34,9 +34,20 @@ function updateTrayMenu(): void {
   const menu = Menu.buildFromTemplate([
     { label: runningLabel, enabled: false },
     { type: 'separator' },
-    { label: 'Open Cron Manager', click: () => { mainWindow?.show(); mainWindow?.focus() } },
+    {
+      label: 'Open Cron Manager',
+      click: () => {
+        mainWindow?.show()
+        mainWindow?.focus()
+      }
+    },
     { type: 'separator' },
-    { label: 'Quit', click: () => { app.exit(0) } },
+    {
+      label: 'Quit',
+      click: () => {
+        app.exit(0)
+      }
+    }
   ])
   tray.setContextMenu(menu)
 }
@@ -52,8 +63,8 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
-    },
+      sandbox: false
+    }
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -82,7 +93,7 @@ app.whenReady().then(() => {
   const jobRepo = new JobRepository(db)
   scheduler = new SchedulerEngine({
     onJobStart: () => {},
-    onJobFinish: () => {},
+    onJobFinish: () => {}
   })
 
   createWindow()
